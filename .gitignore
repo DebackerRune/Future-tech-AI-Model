@@ -1,0 +1,18 @@
+node_modules/
+dist/
+dev-dist/
+.env
+.env.local
+.env.*.local
+*.log
+.firebase/
+firebase-debug.log
+firestore-debug.log
+.vercel/
+.DS_Store
+
+# Local datasets (large, kept out of git)
+dataset/
+dataset_public/
+dataset_rejected/
+upload/

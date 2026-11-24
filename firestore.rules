@@ -1,0 +1,91 @@
+rules_version = '2';
+
+// GeldScan – only results are stored (no images, no audio, no personal data).
+// users/{uid}             totals per anonymous user
+// users/{uid}/scans/{id}  one document per confidently recognised note
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    function scanPath(uid, scanId) {
+      return /databases/$(database)/documents/users/$(uid)/scans/$(scanId);
+    }
+
+    // Possible points of one scan: 10, +50 all-notes bonus, +25 streak bonus.
+    function validPoints(p) {
+      return p in [10, 35, 60, 85];
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+
+      // First use: everything starts at zero.
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['points', 'scanCount', 'seen', 'badges', 'streakDays',
+                                                  'lastScanAt', 'lastScanValue', 'lastScanId', 'createdAt'])
+        && request.resource.data.points == 0
+        && request.resource.data.scanCount == 0
+        && request.resource.data.seen == []
+        && request.resource.data.badges == []
+        && request.resource.data.streakDays == 0
+        && request.resource.data.lastScanAt == null
+        && request.resource.data.lastScanValue == null
+        && request.resource.data.lastScanId == null
+        && request.resource.data.createdAt == request.time;
+
+      // Only together with a new scan (same batch): +1 scan, points up by that scan's points.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['points', 'scanCount', 'seen', 'badges', 'streakDays', 'lastScanAt', 'lastScanValue', 'lastScanId'])
+        && request.resource.data.scanCount == resource.data.scanCount + 1
+        && validPoints(request.resource.data.points - resource.data.points)
+        && request.resource.data.seen is list && request.resource.data.seen.size() <= 10
+        && request.resource.data.badges is list && request.resource.data.badges.size() <= 10
+        && request.resource.data.streakDays is int && request.resource.data.streakDays >= 1
+        && request.resource.data.lastScanAt == request.time
+        && request.resource.data.lastScanId is string
+        && !exists(scanPath(uid, request.resource.data.lastScanId))
+        && existsAfter(scanPath(uid, request.resource.data.lastScanId))
+        && getAfter(scanPath(uid, request.resource.data.lastScanId)).data.points
+             == request.resource.data.points - resource.data.points
+        && getAfter(scanPath(uid, request.resource.data.lastScanId)).data.valueEuro
+             == request.resource.data.lastScanValue;
+
+      // "Wis al mijn gegevens"
+      allow delete: if isOwner(uid);
+
+      match /scans/{scanId} {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['label', 'valueEuro', 'confidence', 'points', 'mode', 'createdAt'])
+          && request.resource.data.keys().hasAll(['label', 'valueEuro', 'confidence', 'points', 'mode', 'createdAt'])
+          && request.resource.data.label is string && request.resource.data.label.size() <= 40
+          && request.resource.data.valueEuro in [5, 10, 20, 50, 100, 200, 500]
+          && request.resource.data.confidence is number
+          && request.resource.data.confidence >= 0.9 && request.resource.data.confidence <= 1
+          && validPoints(request.resource.data.points)
+          && request.resource.data.mode in ['ask', 'continuous', 'counting']
+          && request.resource.data.createdAt == request.time
+          // must be written together with the matching user update
+          && getAfter(userPath(uid)).data.lastScanId == scanId
+          && getAfter(userPath(uid)).data.points == get(userPath(uid)).data.points + request.resource.data.points;
+
+        // Scans are never edited; the owner may delete them ("Wis al mijn gegevens").
+        allow update: if false;
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

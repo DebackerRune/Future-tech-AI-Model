@@ -1,0 +1,167 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { nl } from '@/i18n/nl'
+import { THRESHOLD } from '@/lib/decide'
+import { useSettings } from '@/stores/settings'
+import { usePoints } from '@/stores/points'
+import { useSpeech } from '@/composables/useSpeech'
+import { useAnnouncer } from '@/stores/announcer'
+import AppIcon from '@/components/AppIcon.vue'
+
+const settings = useSettings()
+const points = usePoints()
+const speech = useSpeech()
+const announcer = useAnnouncer()
+const deleteArmed = ref(false)
+const deleting = ref(false)
+
+function testVoice() {
+  speech.speakOnly(nl.settings.testText)
+  if (!settings.appSpeech) announcer.announce(nl.settings.testText)
+}
+
+async function deleteData() {
+  if (!deleteArmed.value) {
+    deleteArmed.value = true
+    speech.say(nl.settings.deleteConfirm)
+    setTimeout(() => (deleteArmed.value = false), 8000)
+    return
+  }
+  deleting.value = true
+  try {
+    await points.deleteAll()
+    speech.say(nl.settings.deleteDone)
+  } finally {
+    deleting.value = false
+    deleteArmed.value = false
+  }
+}
+
+function restartOnboarding() {
+  settings.onboardingDone = false
+}
+
+const choice =
+  'flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 border-line px-4 text-lg has-[:checked]:border-accent has-[:checked]:bg-surface-2'
+</script>
+
+<template>
+  <h1 id="page-title" tabindex="-1" class="mb-4 text-3xl font-bold">{{ nl.titles.settings }}</h1>
+
+  <div class="space-y-4">
+    <section class="card" aria-labelledby="s-speech">
+      <h2 id="s-speech" class="mb-4 text-xl font-bold">{{ nl.settings.speechSection }}</h2>
+
+      <fieldset class="space-y-2">
+        <legend class="mb-2 font-bold">{{ nl.settings.speechMode }}</legend>
+        <label :class="choice">
+          <input v-model="settings.appSpeech" type="radio" name="speech" :value="true" class="size-6 accent-accent" />
+          {{ nl.settings.speechApp }}
+        </label>
+        <label :class="choice">
+          <input v-model="settings.appSpeech" type="radio" name="speech" :value="false" class="size-6 accent-accent" />
+          {{ nl.settings.speechReader }}
+        </label>
+      </fieldset>
+
+      <div class="mt-6">
+        <label class="flex justify-between font-bold" for="rate">
+          <span>{{ nl.settings.rate }}</span>
+          <span class="tabular-nums">{{ settings.rate.toFixed(1) }}×</span>
+        </label>
+        <input
+          id="rate"
+          v-model.number="settings.rate"
+          type="range"
+          min="0.7"
+          max="1.5"
+          step="0.1"
+          :aria-valuetext="settings.rate.toFixed(1)"
+          class="mt-2 h-12 w-full accent-accent"
+        />
+      </div>
+
+      <div class="mt-4">
+        <label class="flex justify-between font-bold" for="volume">
+          <span>{{ nl.settings.volume }}</span>
+          <span class="tabular-nums">{{ Math.round(settings.volume * 100) }}%</span>
+        </label>
+        <input
+          id="volume"
+          v-model.number="settings.volume"
+          type="range"
+          min="0.2"
+          max="1"
+          step="0.1"
+          :aria-valuetext="`${Math.round(settings.volume * 100)} procent`"
+          class="mt-2 h-12 w-full accent-accent"
+        />
+      </div>
+
+      <div class="mt-4">
+        <label class="font-bold" for="voice">{{ nl.settings.voice }}</label>
+        <select
+          id="voice"
+          v-model="settings.voiceURI"
+          class="mt-2 min-h-14 w-full rounded-2xl border-2 border-line bg-bg px-3 text-lg text-fg"
+        >
+          <option value="">{{ nl.settings.voiceDefault }}</option>
+          <option v-for="v in speech.voices.value" :key="v.voiceURI" :value="v.voiceURI">{{ v.name }} ({{ v.lang }})</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn btn-primary mt-5 w-full" @click="testVoice">
+        <AppIcon name="speaker" />
+        {{ nl.settings.test }}
+      </button>
+    </section>
+
+    <section class="card" aria-labelledby="s-feedback">
+      <h2 id="s-feedback" class="mb-4 text-xl font-bold">{{ nl.settings.feedbackSection }}</h2>
+      <div class="space-y-2">
+        <label :class="choice">
+          <input v-model="settings.sounds" type="checkbox" class="size-6 accent-accent" />
+          {{ nl.settings.sounds }}
+        </label>
+        <label :class="choice">
+          <input v-model="settings.vibration" type="checkbox" aria-describedby="vib-hint" class="size-6 accent-accent" />
+          {{ nl.settings.vibration }}
+        </label>
+      </div>
+      <p id="vib-hint" class="mt-3 text-base text-muted">{{ nl.settings.vibrationHint }}</p>
+    </section>
+
+    <section class="card" aria-labelledby="s-display">
+      <h2 id="s-display" class="mb-4 text-xl font-bold">{{ nl.settings.displaySection }}</h2>
+      <fieldset class="space-y-2">
+        <legend class="mb-2 font-bold">{{ nl.settings.theme }}</legend>
+        <label :class="choice">
+          <input v-model="settings.theme" type="radio" name="theme" value="dark" class="size-6 accent-accent" />
+          {{ nl.settings.themeDark }}
+        </label>
+        <label :class="choice">
+          <input v-model="settings.theme" type="radio" name="theme" value="light" class="size-6 accent-accent" />
+          {{ nl.settings.themeLight }}
+        </label>
+      </fieldset>
+    </section>
+
+    <section class="card" aria-labelledby="s-recog">
+      <h2 id="s-recog" class="mb-2 text-xl font-bold">{{ nl.settings.recognitionSection }}</h2>
+      <p>{{ nl.settings.threshold(Math.round(THRESHOLD * 100)) }}</p>
+      <button type="button" class="btn mt-4 w-full" @click="restartOnboarding">{{ nl.settings.onboarding }}</button>
+    </section>
+
+    <section class="card" aria-labelledby="s-data">
+      <h2 id="s-data" class="mb-2 text-xl font-bold">{{ nl.settings.dataSection }}</h2>
+      <p class="flex items-center gap-2 text-base text-muted">
+        <AppIcon name="shield" :size="18" />
+        {{ points.cloud ? nl.points.storedCloud : nl.points.storedLocal }}
+      </p>
+      <button type="button" class="btn btn-danger mt-4 w-full" :disabled="deleting" @click="deleteData">
+        <AppIcon name="trash" />
+        {{ deleteArmed ? nl.settings.deleteConfirm : nl.settings.deleteData }}
+      </button>
+    </section>
+  </div>
+</template>

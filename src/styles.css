@@ -1,0 +1,117 @@
+@import 'tailwindcss';
+
+/*
+  Design tokens. High contrast in both themes (text ≥ 7:1):
+  - dark (default): warm yellow on near-black
+  - light: near-black on white, yellow kept for the big action
+*/
+:root,
+:root[data-theme='dark'] {
+  --bg: #09090b;
+  --surface: #17171b;
+  --surface-2: #232329;
+  --fg: #fafafa;
+  --muted: #c9c9d1;
+  --line: #3a3a44;
+  --accent: #ffd60a;
+  --accent-strong: #ffe14d;
+  --accent-fg: #0b0b0b;
+  --focus: #ffffff;
+  --ok: #86efac;
+  --danger: #fca5a5;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --surface: #f4f4f5;
+  --surface-2: #e4e4e7;
+  --fg: #09090b;
+  --muted: #3f3f46;
+  --line: #a1a1aa;
+  --accent: #ffd60a;
+  --accent-strong: #facc15;
+  --accent-fg: #0b0b0b;
+  --focus: #1d4ed8;
+  --ok: #166534;
+  --danger: #b91c1c;
+  color-scheme: light;
+}
+
+/* Short screens (phone in landscape): compact layout so the main button stays visible. */
+@custom-variant short (@media (max-height: 500px));
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-fg: var(--accent-fg);
+  --color-focus: var(--focus);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+  --font-sans: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    font-size: 112.5%; /* 18 px base, still scales with the user's own font size */
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg text-fg font-sans antialiased leading-relaxed;
+  }
+  :focus-visible {
+    outline: 4px solid var(--focus);
+    outline-offset: 3px;
+  }
+  h1:focus,
+  h2:focus,
+  main:focus {
+    outline: none;
+  }
+  h1:focus-visible,
+  h2:focus-visible {
+    outline: 4px solid var(--focus);
+    outline-offset: 4px;
+  }
+  a {
+    @apply underline underline-offset-4;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border-2 border-line bg-surface px-4 py-3
+      text-lg font-bold text-fg no-underline transition-colors hover:bg-surface-2 active:scale-[0.98] disabled:cursor-not-allowed
+      disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply border-accent bg-accent text-accent-fg hover:bg-accent-strong;
+  }
+  .btn-danger {
+    @apply border-danger text-danger;
+  }
+  .btn[aria-pressed='true'] {
+    @apply border-accent bg-accent text-accent-fg hover:bg-accent-strong;
+  }
+  .card {
+    @apply rounded-3xl border border-line bg-surface p-5;
+  }
+  .eyebrow {
+    @apply text-sm font-bold uppercase tracking-wider text-muted;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
