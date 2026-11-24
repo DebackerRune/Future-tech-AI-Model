@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { nextTick, onMounted } from 'vue'
 import { nl } from '@/i18n/nl'
 import { useSettings } from '@/stores/settings'
 import { usePoints } from '@/stores/points'
@@ -13,6 +13,15 @@ const points = usePoints()
 onMounted(() => {
   void points.init()
 })
+
+// When the onboarding closes, put focus somewhere meaningful (the main button, or the page title)
+// instead of letting it fall back to the top of the document.
+async function onboardingDone() {
+  settings.onboardingDone = true
+  await nextTick()
+  const target = document.getElementById('ask-button') ?? document.getElementById('page-title')
+  target?.focus()
+}
 </script>
 
 <template>
@@ -35,6 +44,6 @@ onMounted(() => {
 
     <BottomNav />
     <LiveRegion />
-    <OnboardingDialog v-if="!settings.onboardingDone" @done="settings.onboardingDone = true" />
+    <OnboardingDialog v-if="!settings.onboardingDone" @done="onboardingDone" />
   </div>
 </template>

@@ -52,7 +52,7 @@ const choice =
     <section class="card" aria-labelledby="s-speech">
       <h2 id="s-speech" class="mb-4 text-xl font-bold">{{ nl.settings.speechSection }}</h2>
 
-      <fieldset class="space-y-2">
+      <fieldset class="min-w-0 space-y-2">
         <legend class="mb-2 font-bold">{{ nl.settings.speechMode }}</legend>
         <label :class="choice">
           <input v-model="settings.appSpeech" type="radio" name="speech" :value="true" class="size-6 accent-accent" />
@@ -103,7 +103,7 @@ const choice =
         <select
           id="voice"
           v-model="settings.voiceURI"
-          class="mt-2 min-h-14 w-full rounded-2xl border-2 border-line bg-bg px-3 text-lg text-fg"
+          class="mt-2 min-h-14 w-full min-w-0 max-w-full truncate rounded-2xl border-2 border-line bg-bg px-3 text-lg text-fg"
         >
           <option value="">{{ nl.settings.voiceDefault }}</option>
           <option v-for="v in speech.voices.value" :key="v.voiceURI" :value="v.voiceURI">{{ v.name }} ({{ v.lang }})</option>
@@ -133,7 +133,7 @@ const choice =
 
     <section class="card" aria-labelledby="s-display">
       <h2 id="s-display" class="mb-4 text-xl font-bold">{{ nl.settings.displaySection }}</h2>
-      <fieldset class="space-y-2">
+      <fieldset class="min-w-0 space-y-2">
         <legend class="mb-2 font-bold">{{ nl.settings.theme }}</legend>
         <label :class="choice">
           <input v-model="settings.theme" type="radio" name="theme" value="dark" class="size-6 accent-accent" />

@@ -36,6 +36,7 @@ function onClick() {
 
 <template>
   <button
+    id="ask-button"
     ref="button"
     type="button"
     :aria-label="busy ? nl.scan.asking : nl.scan.askButton"

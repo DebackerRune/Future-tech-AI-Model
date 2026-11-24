@@ -3,7 +3,7 @@ import { euroWords } from '@/lib/numberWords'
 /** Every visible and spoken text of the app (nl-BE). */
 export const nl = {
   appName: 'GeldScan',
-  skipLink: 'Ga naar de hoofdknop',
+  skipLink: 'Ga naar de inhoud',
 
   nav: {
     label: 'Hoofdmenu',
