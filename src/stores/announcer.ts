@@ -11,9 +11,10 @@ export const useAnnouncer = defineStore('announcer', () => {
   const last = ref('')
 
   function set(target: typeof assertive, text: string) {
-    // Clear first so the same text is announced again when repeated.
+    // Clear first so the same text is announced again when repeated. TalkBack needs a short
+    // pause between "empty" and "new text", otherwise it can miss the change.
     target.value = ''
-    setTimeout(() => (target.value = text), 60)
+    setTimeout(() => (target.value = text), 150)
   }
 
   function announce(text: string, politeness: 'assertive' | 'polite' = 'assertive') {
