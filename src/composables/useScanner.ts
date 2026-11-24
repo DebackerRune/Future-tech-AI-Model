@@ -1,7 +1,7 @@
 import { onBeforeUnmount, ref, shallowRef, type Ref } from 'vue'
 import { nl } from '@/i18n/nl'
 import { aggregatePredictions, type ClassPrediction } from '@/lib/aggregate'
-import { decideAnswer, THRESHOLD } from '@/lib/decide'
+import { ANSWER_THRESHOLD, decideAnswer, THRESHOLD } from '@/lib/decide'
 import { noteValues } from '@/lib/labels'
 import { StabilityTracker } from '@/lib/stability'
 import { euroWords } from '@/lib/numberWords'
@@ -15,6 +15,8 @@ import { useSpeech } from './useSpeech'
 import { useWakeLock } from './useWakeLock'
 
 const ASK_FRAMES = 10
+/** Extra frames when the first look was unsure, before giving up. */
+const RETRY_FRAMES = 8
 const ASK_INTERVAL_MS = 120
 const CONTINUOUS_INTERVAL_MS = 150
 const DARK_LUMINANCE = 45
@@ -41,7 +43,8 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const total = ref(0)
   const resetArmed = ref(false)
 
-  const tracker = new StabilityTracker({ threshold: THRESHOLD })
+  // Continuous mode speaks from 80 %, like asking; points still need 90 %.
+  const tracker = new StabilityTracker({ threshold: ANSWER_THRESHOLD })
   let loopTimer: ReturnType<typeof setTimeout> | undefined
   let lastActivity = 0
   let lastHint = 0
@@ -97,11 +100,27 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       text += ` ${nl.answer.total(total.value)}`
     }
     say(text)
-    // Stored silently in the backend (assignment requirement); nothing about points is shown or spoken.
-    void points.record(label, value, confidence, counting.value ? 'counting' : mode, noteValues(model.labels.value))
+    // Stored silently in the backend (assignment requirement: points only above 90 %).
+    if (confidence >= THRESHOLD) {
+      void points.record(label, value, confidence, counting.value ? 'counting' : mode, noteValues(model.labels.value))
+    }
   }
 
-  /** "Welk biljet is dit?" — look for ~1.2 s, average, answer with the most confident class. */
+  /** Grab `count` frames; returns their predictions and the summed brightness. */
+  async function sample(v: HTMLVideoElement, count: number, into: ClassPrediction[][]): Promise<number> {
+    let lum = 0
+    for (let i = 0; i < count; i++) {
+      const f = await model.predictVideo(v)
+      if (f) {
+        into.push(f.predictions)
+        lum += f.luminance
+      }
+      await sleep(ASK_INTERVAL_MS)
+    }
+    return lum
+  }
+
+  /** "Welk biljet is dit?" — look ~1.2 s, let the frames vote, and say the most confident answer. */
   async function ask(): Promise<void> {
     if (busy.value) return
     busy.value = true
@@ -112,29 +131,33 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       resultText.value = nl.scan.asking
 
       const frames: ClassPrediction[][] = []
-      let lum = 0
-      for (let i = 0; i < ASK_FRAMES; i++) {
-        const f = await model.predictVideo(video.value)
-        if (f) {
-          frames.push(f.predictions)
-          lum += f.luminance
-        }
-        await sleep(ASK_INTERVAL_MS)
+      let lum = await sample(video.value, ASK_FRAMES, frames)
+      let agg = aggregatePredictions(frames)
+      let answer = decideAnswer(agg)
+
+      // Not sure yet but a note is on top: look a little longer before answering.
+      if ((answer.kind === 'unsure' || answer.kind === 'unclear') && video.value) {
+        lum += await sample(video.value, RETRY_FRAMES, frames)
+        agg = aggregatePredictions(frames)
+        answer = decideAnswer(agg)
       }
-      const agg = aggregatePredictions(frames)
+
       perClass.value = agg.perClass
-      const answer = decideAnswer(agg)
       const dark = frames.length > 0 && lum / frames.length < DARK_LUMINANCE
+      const darkHint = dark ? ` ${nl.answer.dark}` : ''
       lastActivity = Date.now()
 
       if (answer.kind === 'note') {
         await onConfidentNote(agg.label, answer.value, answer.confidence, 'ask', true, answer.certain)
       } else if (answer.kind === 'unsure') {
         earcons.play('unsure')
-        say(nl.answer.unsure(answer.value) + (dark ? ` ${nl.answer.dark}` : ''))
+        say(nl.answer.unsure(answer.value) + darkHint)
+      } else if (answer.kind === 'unclear') {
+        earcons.play('unsure')
+        say(nl.answer.unclear + darkHint)
       } else {
         earcons.play('none')
-        say(nl.answer.none + (dark ? ` ${nl.answer.dark}` : ''))
+        say(nl.answer.none + darkHint)
       }
     } finally {
       busy.value = false
@@ -155,7 +178,7 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
           await onConfidentNote(stable.label, stable.value, stable.confidence, 'continuous', false, false)
         } else if (now - lastActivity > HINT_AFTER_MS && now - lastHint > HINT_QUIET_MS) {
           lastHint = now
-          const unsure = top.probability > 0.5 && top.probability < THRESHOLD && /\d/.test(top.className)
+          const unsure = top.probability > 0.5 && top.probability < ANSWER_THRESHOLD && /\d/.test(top.className)
           say(unsure ? nl.hints.unsure : nl.hints.noNote, 'normal')
         }
       }

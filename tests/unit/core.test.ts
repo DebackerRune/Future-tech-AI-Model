@@ -69,26 +69,47 @@ describe('aggregatePredictions', () => {
   it('handles no frames', () => {
     expect(aggregatePredictions([]).frames).toBe(0)
   })
+  it('does not let blurry frames drag a clear recognition down', () => {
+    const agg = aggregatePredictions([
+      ...Array.from({ length: 6 }, () => frame([0, 0, 0.95, 0.03, 0.02])),
+      ...Array.from({ length: 4 }, () => frame([0.1, 0.1, 0.1, 0.1, 0.6])),
+    ])
+    expect(agg.label).toBe('20 euro')
+    expect(agg.confidence).toBeCloseTo(0.95, 5)
+    expect(agg.agreement).toBeCloseTo(0.6, 5)
+  })
 })
 
 describe('decideAnswer', () => {
-  const agg = (label: string, confidence: number) => ({
+  const agg = (label: string, confidence: number, agreement = 1) => ({
     label,
     value: valueFromLabel(label),
     confidence,
+    agreement,
     perClass: [],
     frames: 10,
   })
-  it('is a note at ≥ 90%', () => {
-    expect(decideAnswer(agg('20 euro', 0.92))).toEqual({ kind: 'note', value: 20, confidence: 0.92, certain: false })
-    expect(decideAnswer(agg('20 euro', 0.98))).toMatchObject({ kind: 'note', certain: true })
+  it('says the amount from 80%, and only rewards from 90%', () => {
+    expect(decideAnswer(agg('20 euro', 0.85))).toEqual({
+      kind: 'note',
+      value: 20,
+      confidence: 0.85,
+      certain: false,
+      rewarded: false,
+    })
+    expect(decideAnswer(agg('20 euro', 0.92))).toMatchObject({ kind: 'note', rewarded: true, certain: false })
+    expect(decideAnswer(agg('20 euro', 0.98))).toMatchObject({ kind: 'note', rewarded: true, certain: true })
   })
-  it('is unsure between 60% and 90%', () => {
-    expect(decideAnswer(agg('10 euro', 0.75))).toMatchObject({ kind: 'unsure', value: 10 })
+  it('is unsure between 50% and 80%, or when too few frames agree', () => {
+    expect(decideAnswer(agg('10 euro', 0.6))).toMatchObject({ kind: 'unsure', value: 10 })
+    expect(decideAnswer(agg('10 euro', 0.95, 0.3))).toMatchObject({ kind: 'unsure', value: 10 })
   })
-  it('is none for low confidence or the background class', () => {
-    expect(decideAnswer(agg('10 euro', 0.4)).kind).toBe('none')
+  it('says it sees a note but cannot read it when a note is on top below 50%', () => {
+    expect(decideAnswer(agg('10 euro', 0.4)).kind).toBe('unclear')
+  })
+  it('only says "geen biljet" when that class wins', () => {
     expect(decideAnswer(agg('geen biljet', 0.99)).kind).toBe('none')
+    expect(decideAnswer(agg('geen biljet', 0.4)).kind).toBe('none')
   })
 })
 

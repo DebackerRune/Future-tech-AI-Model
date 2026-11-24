@@ -97,6 +97,8 @@ export const nl = {
     noteShort: (value: number) => `${euroWords(value)}.`,
     unsure: (value: number) =>
       `Ik denk ${euroWords(value)}, maar ik ben niet zeker. Houd het biljet plat, ongeveer twintig centimeter voor de camera, en vraag het opnieuw.`,
+    unclear:
+      'Ik zie een biljet, maar ik kan het niet goed lezen. Houd het stil, plat en iets dichter bij de camera, en vraag het opnieuw.',
     none: 'Ik zie geen biljet. Houd het biljet voor de camera en vraag het opnieuw.',
     dark: 'Het is erg donker. Zet de lamp aan of zoek meer licht.',
     total: (total: number) => `Totaal ${euroWords(total)}.`,

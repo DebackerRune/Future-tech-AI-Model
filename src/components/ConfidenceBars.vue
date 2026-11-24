@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nl } from '@/i18n/nl'
 import type { ClassPrediction } from '@/lib/aggregate'
-import { THRESHOLD } from '@/lib/decide'
+import { ANSWER_THRESHOLD } from '@/lib/decide'
 
 defineProps<{ predictions: ClassPrediction[] }>()
 const pct = (p: number) => Math.round(p * 100)
@@ -21,7 +21,7 @@ const pct = (p: number) => Math.round(p * 100)
         <span class="mt-1 block h-3 overflow-hidden rounded-full bg-surface-2" aria-hidden="true">
           <span
             class="block h-full rounded-full transition-[width]"
-            :class="p.probability >= THRESHOLD ? 'bg-accent' : 'bg-muted'"
+            :class="p.probability >= ANSWER_THRESHOLD ? 'bg-accent' : 'bg-muted'"
             :style="{ width: pct(p.probability) + '%' }"
           ></span>
         </span>

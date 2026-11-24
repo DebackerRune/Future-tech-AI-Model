@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { nl } from '@/i18n/nl'
-import { THRESHOLD } from '@/lib/decide'
+import { ANSWER_THRESHOLD } from '@/lib/decide'
 import { useSettings } from '@/stores/settings'
 import { usePoints } from '@/stores/points'
 import { useSpeech } from '@/composables/useSpeech'
@@ -156,7 +156,7 @@ const choice =
 
     <section class="card" aria-labelledby="s-recog">
       <h2 id="s-recog" class="mb-2 text-xl font-bold">{{ nl.settings.recognitionSection }}</h2>
-      <p>{{ nl.settings.threshold(Math.round(THRESHOLD * 100)) }}</p>
+      <p>{{ nl.settings.threshold(Math.round(ANSWER_THRESHOLD * 100)) }}</p>
       <button type="button" data-direct class="btn mt-4 w-full" @click="restartOnboarding">{{ nl.settings.onboarding }}</button>
     </section>
 
