@@ -156,7 +156,7 @@ const choice =
       <h2 id="s-data" class="mb-2 text-xl font-bold">{{ nl.settings.dataSection }}</h2>
       <p class="flex items-center gap-2 text-base text-muted">
         <AppIcon name="shield" :size="18" />
-        {{ points.cloud ? nl.points.storedCloud : nl.points.storedLocal }}
+        {{ points.cloud ? nl.settings.storedCloud : nl.settings.storedLocal }}
       </p>
       <button type="button" class="btn btn-danger mt-4 w-full" :disabled="deleting" @click="deleteData">
         <AppIcon name="trash" />

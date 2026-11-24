@@ -6,7 +6,6 @@ import { euroWords } from '@/lib/numberWords'
 import { useScanner } from '@/composables/useScanner'
 import { useRecognition } from '@/composables/useRecognition'
 import { useEarcons } from '@/composables/useEarcons'
-import { usePoints } from '@/stores/points'
 import BigAskButton from '@/components/BigAskButton.vue'
 import ToggleButton from '@/components/ToggleButton.vue'
 import ConfidenceBars from '@/components/ConfidenceBars.vue'
@@ -16,7 +15,6 @@ const big = ref<InstanceType<typeof BigAskButton> | null>(null)
 const videoEl = computed(() => big.value?.video ?? null)
 const scanner = useScanner(videoEl)
 const earcons = useEarcons()
-const points = usePoints()
 
 const recognition = useRecognition(onIntent)
 
@@ -42,9 +40,6 @@ async function onIntent(intent: Intent) {
       return scanner.setTorch(true)
     case 'torchOff':
       return scanner.setTorch(false)
-    case 'points':
-      await points.init()
-      return scanner.say(nl.answer.points(points.state.points, points.state.scanCount))
     case 'help':
       return scanner.say(nl.voiceHelp)
     case 'stop':

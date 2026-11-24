@@ -1,5 +1,4 @@
-import { dutchNumber, euroWords } from '@/lib/numberWords'
-import type { Badge } from '@/lib/reward'
+import { euroWords } from '@/lib/numberWords'
 
 /** Every visible and spoken text of the app (nl-BE). */
 export const nl = {
@@ -9,14 +8,12 @@ export const nl = {
   nav: {
     label: 'Hoofdmenu',
     scan: 'Scannen',
-    points: 'Punten',
     settings: 'Instellingen',
     help: 'Hulp',
   },
 
   titles: {
     scan: 'Biljet herkennen',
-    points: 'Mijn punten',
     settings: 'Instellingen',
     help: 'Hulp en privacy',
     notFound: 'Pagina niet gevonden',
@@ -52,9 +49,6 @@ export const nl = {
     dark: 'Het is erg donker. Zet de lamp aan of zoek meer licht.',
     total: (total: number) => `Totaal ${euroWords(total)}.`,
     totalNow: (total: number) => `Je hebt samen ${euroWords(total)} geteld.`,
-    badge: (name: string) => `Gefeliciteerd, je hebt de badge ${name} verdiend.`,
-    points: (points: number, scans: number) =>
-      `Je hebt ${dutchNumber(points)} punten en ${dutchNumber(scans)} ${scans === 1 ? 'biljet' : 'biljetten'} herkend.`,
   },
 
   hints: {
@@ -85,11 +79,10 @@ export const nl = {
     camera: 'De camera kon niet starten. Sluit andere apps die de camera gebruiken en probeer opnieuw.',
     voiceUnsupported: 'Spraakbediening werkt niet in deze browser. Gebruik de grote knop.',
     voiceDenied: 'Ik heb geen toegang tot de microfoon. Sta de microfoon toe of gebruik de grote knop.',
-    save: 'Je punten konden niet opgeslagen worden. Ik probeer het later opnieuw.',
   },
 
   voiceHelp:
-    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Automatisch aan of uit. Lamp aan of uit. Punten. Help. Of stop.',
+    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Automatisch aan of uit. Lamp aan of uit. Help. Of stop.',
 
   commandList: [
     ['Welk biljet is dit? / Wat is dit?', 'Herkent het biljet voor de camera'],
@@ -99,37 +92,9 @@ export const nl = {
     ['Tellen aan / uit', 'Telt elk herkend biljet op'],
     ['Automatisch aan / uit', 'Zegt een biljet vanzelf, zonder te vragen'],
     ['Lamp aan / uit', 'Zet de zaklamp van je telefoon aan of uit'],
-    ['Punten', 'Leest je punten en badges voor'],
     ['Help', 'Zegt welke opdrachten er zijn'],
     ['Stop', 'Stopt met praten'],
   ] as const,
-
-  badges: {
-    'first-scan': 'Eerste biljet',
-    'all-notes': 'Alle biljetten herkend',
-    'streak-3': 'Drie dagen op rij',
-  } satisfies Record<Badge, string>,
-
-  points: {
-    total: 'Punten',
-    scans: 'Biljetten herkend',
-    streak: 'Dagen op rij',
-    badges: 'Badges',
-    noBadges: 'Nog geen badges.',
-    recent: 'Laatste scans',
-    noScans: 'Nog geen biljetten herkend.',
-    readAloud: 'Lees mijn punten voor',
-    rules: 'Zo verdien je punten',
-    ruleList: [
-      'Tien punten per herkend biljet, als de app minstens negentig procent zeker is.',
-      'Vijftig extra punten als je elk biljet minstens één keer hebt laten herkennen.',
-      'Vijfentwintig extra punten als je drie dagen op rij scant.',
-      'Hetzelfde biljet telt maar één keer per tien seconden.',
-    ],
-    storedCloud: 'Je punten worden anoniem bewaard in de cloud.',
-    storedLocal: 'Je punten worden alleen op dit toestel bewaard.',
-    scanItem: (value: number, pct: number, when: string) => `${euroWords(value)}, ${pct} procent zeker, ${when}`,
-  },
 
   settings: {
     speechSection: 'Spraak',
@@ -151,11 +116,13 @@ export const nl = {
     themeDark: 'Geel op zwart',
     themeLight: 'Zwart op wit',
     recognitionSection: 'Herkenning',
-    threshold: (pct: number) => `Een biljet telt pas mee vanaf ${pct} procent zekerheid.`,
+    threshold: (pct: number) => `De app noemt een bedrag pas met zekerheid vanaf ${pct} procent.`,
     onboarding: 'Uitleg opnieuw starten',
     dataSection: 'Mijn gegevens',
     deleteData: 'Wis al mijn gegevens',
-    deleteConfirm: 'Druk nog eens om al je punten en scans definitief te wissen.',
+    deleteConfirm: 'Druk nog eens om al je opgeslagen scans definitief te wissen.',
+    storedCloud: 'Herkende bedragen worden anoniem bewaard in de cloud.',
+    storedLocal: 'Herkende bedragen worden alleen op dit toestel bewaard.',
     deleteDone: 'Al je gegevens zijn gewist.',
     saved: 'Opgeslagen.',
   },
@@ -170,8 +137,8 @@ export const nl = {
       'GeldScan herkent eurobiljetten met de camera van je telefoon en zegt het bedrag.',
       'Houd het biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant van je telefoon. Zorg voor genoeg licht.',
       'Druk op de grote knop: welk biljet is dit. Of zet Luisteren aan en vraag het hardop. De app kijkt even en zegt dan het antwoord.',
-      'Je kan ook zeggen: herhaal, totaal, tellen aan, lamp aan, punten of help.',
-      'Privacy: de camerabeelden blijven op je toestel. Als je spraakbediening gebruikt, verwerkt je browser je stem, in Chrome via Google. Alleen het bedrag en je punten worden anoniem bewaard.',
+      'Je kan ook zeggen: herhaal, totaal, tellen aan, lamp aan of help.',
+      'Privacy: de camerabeelden blijven op je toestel. Als je spraakbediening gebruikt, verwerkt je browser je stem, in Chrome via Google. Alleen het herkende bedrag wordt anoniem bewaard.',
       'Wil je dat de app zelf praat, of gebruik je liever alleen je schermlezer? Je kan dit later wijzigen in de instellingen.',
     ],
   },
@@ -189,7 +156,7 @@ export const nl = {
     privacyTitle: 'Privacy',
     privacy: [
       'De camerabeelden worden alleen in het geheugen van je toestel verwerkt. Ze worden nooit opgeslagen of verstuurd.',
-      'Opgeslagen worden alleen: het bedrag, hoe zeker de app was, je punten en het tijdstip, onder een anonieme code. Geen naam, geen e-mail, geen beelden.',
+      'Opgeslagen worden alleen: het bedrag, hoe zeker de app was en het tijdstip, onder een anonieme code. Geen naam, geen e-mail, geen beelden.',
       'Spraakbediening staat standaard uit. Zet je ze aan, dan verwerkt je browser je stem. In Chrome gebeurt dat via de spraakdienst van Google.',
       'Je kan al je gegevens wissen in de instellingen.',
     ],

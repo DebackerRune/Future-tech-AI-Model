@@ -97,11 +97,8 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       text += ` ${nl.answer.total(total.value)}`
     }
     say(text)
-    const result = await points.record(label, value, confidence, counting.value ? 'counting' : mode, noteValues(model.labels.value))
-    for (const badge of result.newBadges) {
-      if (badge === 'first-scan') continue // not worth interrupting for
-      say(`${text} ${nl.answer.badge(nl.badges[badge])}`)
-    }
+    // Stored silently in the backend (assignment requirement); nothing about points is shown or spoken.
+    void points.record(label, value, confidence, counting.value ? 'counting' : mode, noteValues(model.labels.value))
   }
 
   /** "Welk biljet is dit?" — look for ~1.2 s, average, answer with the most confident class. */

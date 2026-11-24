@@ -25,8 +25,6 @@ describe('parseCommand', () => {
     ['lamp aan', 'torchOn'],
     ['zet het licht aan', 'torchOn'],
     ['lamp uit', 'torchOff'],
-    ['hoeveel punten heb ik', 'points'],
-    ['lees mijn punten voor', 'points'],
     ['help', 'help'],
     ['wat kan ik zeggen', 'help'],
     ['stop', 'stop'],

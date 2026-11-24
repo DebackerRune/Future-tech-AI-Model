@@ -10,20 +10,22 @@ Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
 
 - **"Welk biljet is dit?"**: de app kijkt ±1,2 seconde (10 beelden), neemt het gemiddelde per klasse en zegt het
   meest zekere antwoord: *"Dit is een biljet van twintig euro. Ik ben er zeker van."*
-  - ≥ 90 % zeker → antwoord + punten
-  - 60–90 % → *"Ik denk twintig euro, maar ik ben niet zeker…"* (geen punten)
+  - ≥ 90 % zeker → antwoord, en de scan wordt (met punten) opgeslagen in de backend
+  - 60–90 % → *"Ik denk twintig euro, maar ik ben niet zeker…"* (niets opgeslagen)
   - anders → *"Ik zie geen biljet…"*, met een tip als het te donker is
 - **Spraak**: Nederlandse stem (nl-BE), instelbare snelheid, volume en stem. Kies "de app praat zelf" of
   "alleen mijn schermlezer" (aria-live) om dubbele spraak te vermijden.
 - **Spraakopdrachten** (optioneel): welk biljet is dit, herhaal, totaal, wis totaal, tellen aan/uit,
-  automatisch aan/uit, lamp aan/uit, punten, help, stop. Ook *push-to-talk*: de grote knop lang indrukken.
+  automatisch aan/uit, lamp aan/uit, help, stop. Ook *push-to-talk*: de grote knop lang indrukken.
 - **Trillen per biljet** (ook voor doofblinden): €5 = 1×, €10 = 2×, €20 = 3×, €50 = 4×.
 - **Korte geluidjes** (Web Audio) voor kijken, gevonden, niet zeker, niets gevonden en fout.
 - **Tellen**: telt meerdere biljetten op (*"Twintig euro. Totaal vijfenvijftig euro."*).
 - **Automatisch**: zegt een biljet vanzelf zodra het 5 beelden op rij ≥ 90 % zeker is; hetzelfde biljet pas
   opnieuw nadat het weggehaald is.
 - **Zaklamp**, scherm blijft aan tijdens het scannen, camera stopt als de app op de achtergrond gaat.
-- **Punten en badges**, opgeslagen in Firebase (anoniem) of lokaal als Firebase niet ingesteld is.
+- **Beloningssysteem in de backend**: elke herkenning ≥ 90 % levert punten en badges op die (anoniem) in Firebase
+  worden opgeslagen, of lokaal als Firebase niet ingesteld is. Ze worden bewust **niet getoond of uitgesproken**:
+  voor de gebruiker draait alles om een snel en rustig antwoord.
 - **Installeerbaar (PWA)**; het model wordt gecachet.
 
 ## Toegankelijkheid
@@ -106,7 +108,7 @@ Een scan en de nieuwe totalen worden in **één batch** geschreven. De regels (`
 - punten alleen kunnen stijgen samen met een nieuwe scan;
 - scans achteraf niet aangepast kunnen worden.
 
-### Punten
+### Punten (alleen in de backend, niet zichtbaar in de app)
 
 | Gebeurtenis | Punten |
 |---|---|

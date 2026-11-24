@@ -9,7 +9,6 @@ export type Intent =
   | 'continuousOff'
   | 'torchOn'
   | 'torchOff'
-  | 'points'
   | 'help'
   | 'stop'
 
@@ -38,7 +37,6 @@ const RULES: [Intent, RegExp][] = [
   ['continuousOff', new RegExp(`\\b(automatisch|automaat|doorlopend)\\b.*\\b${OFF}\\b`)],
   ['torchOn', new RegExp(`\\b(lamp|licht|zaklamp|flits)\\b.*\\b${ON}\\b`)],
   ['torchOff', new RegExp(`\\b(lamp|licht|zaklamp|flits)\\b.*\\b${OFF}\\b`)],
-  ['points', /\b(punten|punt|score|badges?)\b/],
   ['total', /\b(totaal|hoeveel heb ik|hoeveel geld|samen)\b/],
   ['help', /\b(help|hulp|wat kan ik zeggen|commandos?|opdrachten)\b/],
   ['repeat', /\b(herhaal|herhalen|nog eens|nog een keer|opnieuw zeggen|wat zei je|pardon)\b/],
