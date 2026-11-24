@@ -16,3 +16,6 @@ dataset/
 dataset_public/
 dataset_rejected/
 upload/
+
+# Local training output
+tools/train-tm/out/

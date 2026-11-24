@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <title>GeldScan – model trainen</title>
+    <style>
+      body { font: 16px/1.5 system-ui, sans-serif; margin: 2rem; background: #111; color: #eee; }
+      pre { background: #000; padding: 1rem; white-space: pre-wrap; }
+      button { font: inherit; padding: .5rem 1rem; margin-right: .5rem; }
+    </style>
+    <script>
+      // TF.js yields to requestAnimationFrame between training batches (and keeps a reference to it
+      // from load time); a background tab never paints, so training would stall. Use a timer instead.
+      window.requestAnimationFrame = (cb) => setTimeout(() => cb(performance.now()), 0)
+    </script>
+    <script src="/lib/tf.min.js"></script>
+    <script src="/lib/tm.min.js"></script>
+  </head>
+  <body>
+    <h1>GeldScan – Teachable Machine-model trainen</h1>
+    <p>
+      Traint een model met de officiële <code>@teachablemachine/image</code> trainings-API (dezelfde als de
+      Teachable Machine-website), test het op apart gehouden beelden en schrijft het weg naar
+      <code>tools/train-tm/out/</code>.
+    </p>
+    <button onclick="run({ name: 'alpha035', alpha: 0.35, split: 'train' })">Train 0.35 (test)</button>
+    <button onclick="run({ name: 'alpha100', alpha: 1, split: 'train' })">Train 1.0 (test)</button>
+    <button onclick="evalCurrent()">Test huidig model</button>
+    <pre id="log"></pre>
+
+    <script>
+      const logEl = document.getElementById('log')
+      window.__status = { state: 'idle', lines: [] }
+      function log(msg) {
+        window.__status.lines.push(msg)
+        logEl.textContent += msg + '\n'
+      }
+
+      /**
+       * Load an image as a 224×224 canvas, cropped to the centre square — exactly what the app does
+       * with camera frames (useModel.predictVideo) and what the Teachable Machine website does.
+       */
+      const imgCache = new Map()
+      function loadImage(url) {
+        if (!imgCache.has(url)) {
+          imgCache.set(
+            url,
+            new Promise((resolve, reject) => {
+              const img = new Image()
+              img.onload = () => {
+                const s = Math.min(img.naturalWidth, img.naturalHeight)
+                const c = document.createElement('canvas')
+                c.width = c.height = 224
+                c.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, 224, 224)
+                resolve(c)
+              }
+              img.onerror = reject
+              img.src = url
+            }),
+          )
+        }
+        return imgCache.get(url)
+      }
+
+      async function evaluate(model, items, classes) {
+        const n = classes.length
+        const confusion = Array.from({ length: n }, () => Array(n).fill(0))
+        let correct = 0
+        for (const it of items) {
+          const img = await loadImage(it.url)
+          const preds = await model.predict(img)
+          let best = 0
+          preds.forEach((p, i) => { if (p.probability > preds[best].probability) best = i })
+          const predicted = classes.indexOf(preds[best].className)
+          confusion[it.c][predicted]++
+          if (predicted === it.c) correct++
+        }
+        const perClass = classes.map((c, i) => {
+          const total = confusion[i].reduce((a, b) => a + b, 0)
+          return { class: c, total, correct: confusion[i][i], accuracy: total ? confusion[i][i] / total : 0 }
+        })
+        return { accuracy: correct / items.length, total: items.length, perClass, confusion }
+      }
+
+      function printEval(title, r, classes) {
+        log(`\n== ${title}: ${(r.accuracy * 100).toFixed(1)} % juist op ${r.total} testbeelden ==`)
+        r.perClass.forEach((p) => log(`  ${p.class.padEnd(12)} ${(p.accuracy * 100).toFixed(1).padStart(5)} %  (${p.correct}/${p.total})`))
+        log('  verwarring (rij = echt, kolom = voorspeld): ' + classes.join(' | '))
+        r.confusion.forEach((row, i) => log(`  ${classes[i].padEnd(12)} ${row.map((v) => String(v).padStart(4)).join('')}`))
+      }
+
+      async function save(model, name, metadata) {
+        await model.save(
+          tf.io.withSaveHandler(async (artifacts) => {
+            const modelJson = {
+              modelTopology: artifacts.modelTopology,
+              format: 'layers-model',
+              generatedBy: 'TensorFlow.js tfjs-layers v' + tf.version.tfjs,
+              convertedBy: null,
+              weightsManifest: [{ paths: ['weights.bin'], weights: artifacts.weightSpecs }],
+            }
+            await fetch(`/save/${name}/model.json`, { method: 'POST', body: JSON.stringify(modelJson) })
+            await fetch(`/save/${name}/weights.bin`, { method: 'POST', body: artifacts.weightData })
+            return { modelArtifactsInfo: { dateSaved: new Date(), modelTopologyType: 'JSON' } }
+          }),
+        )
+        await fetch(`/save/${name}/metadata.json`, { method: 'POST', body: JSON.stringify(metadata, null, 2) })
+      }
+
+      /** Train with the Teachable Machine API. split: 'train' (80 %, then test) or 'all' (final model). */
+      window.run = async function ({ name, alpha, split = 'train', epochs = 50, batchSize = 16, learningRate = 0.001, denseUnits = 100 }) {
+        window.__status = { state: 'running', lines: [], result: null }
+        logEl.textContent = ''
+        try {
+          const manifest = await (await fetch('/manifest.json')).json()
+          const classes = manifest.classes
+          const trainItems = split === 'all' ? manifest.train.concat(manifest.test) : manifest.train
+          log(`${name}: MobileNet v2 alpha ${alpha}, ${trainItems.length} trainingsbeelden, ${manifest.test.length} testbeelden`)
+
+          const metadata = {
+            tfjsVersion: tf.version.tfjs,
+            tmVersion: '2.4.19',
+            packageVersion: tmImage.version,
+            packageName: '@teachablemachine/image',
+            timeStamp: new Date().toISOString(),
+            userMetadata: { trainedWith: 'tools/train-tm', alpha, epochs, split },
+            modelName: 'GeldScan',
+            labels: classes,
+            imageSize: 224,
+          }
+          const model = await tmImage.createTeachable(metadata, { version: 2, alpha })
+          model.setLabels(classes)
+          model.setSeed('geldscan')
+
+          const t0 = performance.now()
+          for (let i = 0; i < trainItems.length; i++) {
+            const img = await loadImage(trainItems[i].url)
+            await model.addExample(trainItems[i].c, img)
+            if (i % 200 === 0) log(`  kenmerken berekend: ${i}/${trainItems.length}`)
+          }
+          log(`  kenmerken klaar in ${((performance.now() - t0) / 1000).toFixed(0)} s, trainen…`)
+
+          await model.train(
+            { denseUnits, epochs, learningRate, batchSize },
+            {
+              onEpochEnd: (epoch, logs) => {
+                if ((epoch + 1) % 10 === 0)
+                  log(`  epoch ${epoch + 1}/${epochs}: acc ${logs.acc.toFixed(3)}, val_acc ${logs.val_acc.toFixed(3)}, loss ${logs.loss.toFixed(3)}`)
+              },
+            },
+          )
+
+          let evalResult = null
+          if (split !== 'all') {
+            evalResult = await evaluate(model, manifest.test, classes)
+            printEval(name, evalResult, classes)
+          }
+          await save(model, name, metadata)
+          log(`  opgeslagen in tools/train-tm/out/${name}/`)
+          window.__status.result = evalResult
+          window.__status.state = 'done'
+        } catch (e) {
+          log('FOUT: ' + (e && e.stack ? e.stack : e))
+          window.__status.state = 'error'
+        }
+      }
+
+      /** Test the model currently in public/model on the same test images (it has seen them in training!). */
+      window.evalCurrent = async function () {
+        window.__status = { state: 'running', lines: [], result: null }
+        logEl.textContent = ''
+        try {
+          const manifest = await (await fetch('/manifest.json')).json()
+          const model = await tmImage.load('/current-model/model.json', '/current-model/metadata.json')
+          const r = await evaluate(model, manifest.test, manifest.classes)
+          printEval('huidig model (heeft deze beelden al gezien!)', r, manifest.classes)
+          window.__status.result = r
+          window.__status.state = 'done'
+        } catch (e) {
+          log('FOUT: ' + (e && e.stack ? e.stack : e))
+          window.__status.state = 'error'
+        }
+      }
+    </script>
+  </body>
+</html>
