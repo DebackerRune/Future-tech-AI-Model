@@ -129,7 +129,7 @@ onMounted(async () => {
         :pressed="scanner.camera.torchOn.value"
         @toggle="scanner.setTorch"
       />
-      <button v-if="showTotal" type="button" class="btn btn-danger w-full justify-start" @click="scanner.resetTotal()">
+      <button v-if="showTotal" type="button" data-direct class="btn btn-danger w-full justify-start" @click="scanner.resetTotal()">
         <AppIcon name="trash" />
         {{ scanner.resetArmed.value ? nl.toggles.resetConfirm : nl.scan.resetTotal }}
       </button>

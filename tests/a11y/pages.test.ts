@@ -9,7 +9,7 @@ import ScanPage from '@/pages/ScanPage.vue'
 import SettingsPage from '@/pages/SettingsPage.vue'
 import HelpPage from '@/pages/HelpPage.vue'
 import NotFoundPage from '@/pages/NotFoundPage.vue'
-import OnboardingDialog from '@/components/OnboardingDialog.vue'
+import StartScreen from '@/components/StartScreen.vue'
 import BottomNav from '@/components/BottomNav.vue'
 
 // jsdom has no media, canvas or dialog support; the a11y checks only need the DOM.
@@ -46,7 +46,7 @@ describe('accessibility (axe)', () => {
     ['SettingsPage', SettingsPage],
     ['HelpPage', HelpPage],
     ['NotFoundPage', NotFoundPage],
-    ['OnboardingDialog', OnboardingDialog],
+    ['StartScreen', StartScreen],
     ['BottomNav', BottomNav],
   ] as const)('%s has no violations', async (_name, component) => {
     expect(await check(component)).toEqual([])

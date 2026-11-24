@@ -21,6 +21,57 @@ export const nl = {
 
   pageOpened: (title: string) => `${title}.`,
 
+  /** Start screen: one tap anywhere unlocks speech (browsers block speech before the first touch). */
+  start: {
+    title: 'GeldScan',
+    tap: 'Tik ergens op het scherm om te starten',
+    hint: 'De app praat dan en legt uit hoe ze werkt.',
+    screenReader: 'Ik gebruik TalkBack of VoiceOver',
+    screenReaderOn: 'Oké. De app laat het voorlezen nu over aan je schermlezer.',
+  },
+
+  /** Spoken explanation of the app and the screen layout. */
+  intro: {
+    full:
+      'Welkom bij GeldScan. Deze app herkent eurobiljetten en zegt het bedrag. ' +
+      'Zo werkt het scherm: bijna het hele scherm is één grote knop. Tik daar één keer op om een biljet te laten herkennen. ' +
+      'Houd het biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant van je telefoon. ' +
+      'De eerste keer vraagt je telefoon toegang tot de camera. Tik dan op Toestaan. ' +
+      'Helemaal onderaan het scherm staan drie knoppen naast elkaar: links Scannen, in het midden Instellingen, rechts Hulp. ' +
+      'Alle andere knoppen tik je één keer aan om te horen wat ze doen, en nog een keer om ze te gebruiken. ' +
+      'Wil je dit opnieuw horen? Open dan Hulp, onderaan rechts.',
+    short:
+      'GeldScan is klaar. Tik in het midden van het scherm om een biljet te herkennen. Onderaan rechts staat Hulp, als je de uitleg opnieuw wil horen.',
+  },
+
+  /** Spoken when a page opens, so the user knows what is on it and where. */
+  pageIntro: {
+    scan:
+      'Biljet herkennen. Tik in het midden van het scherm om een biljet te herkennen. ' +
+      'Onder de grote knop staan Herhaal, Luisteren, Tellen en Automatisch. Onderaan staan Scannen, Instellingen en Hulp.',
+    settings:
+      'Instellingen. Van boven naar onder: wie de antwoorden voorleest, spreeksnelheid, volume, stem, geluidjes, trillen, kleuren, de uitleg, en je gegevens wissen. ' +
+      'Tik een knop één keer aan om te horen wat hij doet.',
+    help: 'Hulp en privacy. Bovenaan staat de knop Lees deze pagina voor. Tik erop om de hele uitleg te horen.',
+    notFound: 'Deze pagina bestaat niet. Tik onderaan links op Scannen om terug te gaan.',
+  },
+
+  /** Tap once to hear, tap again to use. */
+  guide: {
+    again: 'Tik nog eens om te gebruiken.',
+    openLink: (name: string) => `${name}. Tik nog eens om te openen.`,
+    toggle: (name: string, on: boolean) =>
+      `${name}, staat ${on ? 'aan' : 'uit'}. Tik nog eens om ${on ? 'uit' : 'aan'} te zetten.`,
+    choice: (name: string, checked: boolean) =>
+      `${name}, ${checked ? 'gekozen' : 'niet gekozen'}. Tik nog eens om te kiezen.`,
+    check: (name: string, checked: boolean) =>
+      `${name}, staat ${checked ? 'aan' : 'uit'}. Tik nog eens om ${checked ? 'uit' : 'aan'} te zetten.`,
+    button: (name: string) => `${name}. Tik nog eens om te gebruiken.`,
+    expand: (name: string, open: boolean) => `${name}. Tik nog eens om ${open ? 'dicht te klappen' : 'open te klappen'}.`,
+  },
+
+  readPage: 'Lees deze pagina voor',
+
   scan: {
     askButton: 'Welk biljet is dit?',
     askHint: 'Tik om te vragen. Lang indrukken om te spreken.',
@@ -33,7 +84,8 @@ export const nl = {
     resetTotal: 'Totaal wissen',
     totalLabel: 'Totaal geteld',
     cameraOff: 'De camera staat uit. Druk op de grote knop om te starten.',
-    cameraStarting: 'Ik vraag nu toegang tot je camera. Sta de camera toe.',
+    cameraStarting:
+      'Je telefoon vraagt nu toegang tot de camera. Tik op Toestaan. Die knop staat meestal in de onderste helft van het scherm.',
     cameraReady: 'De camera staat aan.',
     controls: 'Bediening',
     confidenceTitle: 'Modelzekerheid voor begeleiders',
@@ -61,7 +113,8 @@ export const nl = {
     countingOff: 'Tellen uit.',
     continuousOn: 'Automatisch aan. Houd een biljet voor de camera.',
     continuousOff: 'Automatisch uit.',
-    listeningOn: 'Ik luister. Zeg bijvoorbeeld: welk biljet is dit.',
+    listeningOn:
+      'Ik luister. Vraagt je telefoon toegang tot de microfoon, tik dan op Toestaan. Zeg daarna bijvoorbeeld: welk biljet is dit.',
     listeningOff: 'Ik luister niet meer.',
     torchOn: 'Lamp aan.',
     torchOff: 'Lamp uit.',
@@ -117,7 +170,7 @@ export const nl = {
     themeLight: 'Zwart op wit',
     recognitionSection: 'Herkenning',
     threshold: (pct: number) => `De app noemt een bedrag pas met zekerheid vanaf ${pct} procent.`,
-    onboarding: 'Uitleg opnieuw starten',
+    onboarding: 'Uitleg opnieuw beluisteren',
     dataSection: 'Mijn gegevens',
     deleteData: 'Wis al mijn gegevens',
     deleteConfirm: 'Druk nog eens om al je opgeslagen scans definitief te wissen.',
@@ -127,21 +180,6 @@ export const nl = {
     saved: 'Opgeslagen.',
   },
 
-  onboarding: {
-    title: 'Welkom bij GeldScan',
-    next: 'Volgende',
-    skip: 'Uitleg overslaan',
-    done: 'Begin',
-    step: (n: number, total: number) => `Stap ${n} van ${total}`,
-    steps: [
-      'GeldScan herkent eurobiljetten met de camera van je telefoon en zegt het bedrag.',
-      'Houd het biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant van je telefoon. Zorg voor genoeg licht.',
-      'Druk op de grote knop: welk biljet is dit. Of zet Luisteren aan en vraag het hardop. De app kijkt even en zegt dan het antwoord.',
-      'Je kan ook zeggen: herhaal, totaal, tellen aan, lamp aan of help.',
-      'Privacy: de camerabeelden blijven op je toestel. Als je spraakbediening gebruikt, verwerkt je browser je stem, in Chrome via Google. Alleen het herkende bedrag wordt anoniem bewaard.',
-      'Wil je dat de app zelf praat, of gebruik je liever alleen je schermlezer? Je kan dit later wijzigen in de instellingen.',
-    ],
-  },
 
   help: {
     howTitle: 'Zo gebruik je GeldScan',

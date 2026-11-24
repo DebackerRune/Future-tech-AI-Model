@@ -38,7 +38,12 @@ async function deleteData() {
 }
 
 function restartOnboarding() {
-  settings.onboardingDone = false
+  speech.say(nl.intro.full)
+}
+
+/** Sliders and the voice list are not tapped twice; just say the new value. */
+function sayValue(text: string) {
+  if (settings.appSpeech) speech.say(text)
 }
 
 const choice =
@@ -78,6 +83,7 @@ const choice =
           step="0.1"
           :aria-valuetext="settings.rate.toFixed(1)"
           class="mt-2 h-12 w-full accent-accent"
+          @change="sayValue(`${nl.settings.rate} ${settings.rate.toFixed(1)}`)"
         />
       </div>
 
@@ -95,6 +101,7 @@ const choice =
           step="0.1"
           :aria-valuetext="`${Math.round(settings.volume * 100)} procent`"
           class="mt-2 h-12 w-full accent-accent"
+          @change="sayValue(`${nl.settings.volume} ${Math.round(settings.volume * 100)} procent`)"
         />
       </div>
 
@@ -104,13 +111,14 @@ const choice =
           id="voice"
           v-model="settings.voiceURI"
           class="mt-2 min-h-14 w-full min-w-0 max-w-full truncate rounded-2xl border-2 border-line bg-bg px-3 text-lg text-fg"
+          @change="sayValue(nl.settings.testText)"
         >
           <option value="">{{ nl.settings.voiceDefault }}</option>
           <option v-for="v in speech.voices.value" :key="v.voiceURI" :value="v.voiceURI">{{ v.name }} ({{ v.lang }})</option>
         </select>
       </div>
 
-      <button type="button" class="btn btn-primary mt-5 w-full" @click="testVoice">
+      <button type="button" data-direct class="btn btn-primary mt-5 w-full" @click="testVoice">
         <AppIcon name="speaker" />
         {{ nl.settings.test }}
       </button>
@@ -149,7 +157,7 @@ const choice =
     <section class="card" aria-labelledby="s-recog">
       <h2 id="s-recog" class="mb-2 text-xl font-bold">{{ nl.settings.recognitionSection }}</h2>
       <p>{{ nl.settings.threshold(Math.round(THRESHOLD * 100)) }}</p>
-      <button type="button" class="btn mt-4 w-full" @click="restartOnboarding">{{ nl.settings.onboarding }}</button>
+      <button type="button" data-direct class="btn mt-4 w-full" @click="restartOnboarding">{{ nl.settings.onboarding }}</button>
     </section>
 
     <section class="card" aria-labelledby="s-data">
@@ -158,7 +166,7 @@ const choice =
         <AppIcon name="shield" :size="18" />
         {{ points.cloud ? nl.settings.storedCloud : nl.settings.storedLocal }}
       </p>
-      <button type="button" class="btn btn-danger mt-4 w-full" :disabled="deleting" @click="deleteData">
+      <button type="button" data-direct class="btn btn-danger mt-4 w-full" :disabled="deleting" @click="deleteData">
         <AppIcon name="trash" />
         {{ deleteArmed ? nl.settings.deleteConfirm : nl.settings.deleteData }}
       </button>
