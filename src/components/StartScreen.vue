@@ -7,7 +7,8 @@ import { useAnnouncer } from '@/stores/announcer'
 
 /**
  * Shown on every launch. Browsers do not allow a page to speak before the user has touched it,
- * so the whole screen is one button: the first tap unlocks speech and the app explains itself.
+ * so the whole screen is one button. How it is tapped decides who talks (see useVoiceGuide):
+ * a finger → the app speaks itself; a TalkBack/VoiceOver double-tap → the screen reader does.
  */
 const emit = defineEmits<{ done: [] }>()
 const settings = useSettings()
@@ -21,16 +22,10 @@ onMounted(async () => {
 })
 
 function start() {
-  settings.appSpeech = true
-  speech.say(settings.onboardingDone ? nl.intro.short : nl.intro.full)
+  // settings.appSpeech was just set by the click detection in useVoiceGuide.
+  if (settings.appSpeech) speech.say(settings.onboardingDone ? nl.intro.short : nl.intro.full)
+  else announcer.announce(nl.intro.screenReader)
   settings.onboardingDone = true
-  emit('done')
-}
-
-function useScreenReader() {
-  settings.appSpeech = false
-  settings.onboardingDone = true
-  announcer.announce(nl.start.screenReaderOn)
   emit('done')
 }
 </script>
@@ -40,6 +35,7 @@ function useScreenReader() {
     <button
       ref="startBtn"
       type="button"
+      data-start
       data-direct
       class="flex flex-1 flex-col items-center justify-center gap-6 rounded-[2rem] border-4 border-accent bg-accent p-6 text-center text-accent-fg"
       @click="start"
@@ -48,9 +44,6 @@ function useScreenReader() {
       <span class="text-4xl font-bold">{{ nl.start.title }}</span>
       <span class="text-2xl leading-snug font-bold">{{ nl.start.tap }}</span>
       <span class="text-lg">{{ nl.start.hint }}</span>
-    </button>
-    <button type="button" data-direct class="btn mt-4 w-full" @click="useScreenReader">
-      {{ nl.start.screenReader }}
     </button>
   </div>
 </template>

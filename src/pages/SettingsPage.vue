@@ -5,20 +5,13 @@ import { ANSWER_THRESHOLD } from '@/lib/decide'
 import { useSettings } from '@/stores/settings'
 import { usePoints } from '@/stores/points'
 import { useSpeech } from '@/composables/useSpeech'
-import { useAnnouncer } from '@/stores/announcer'
 import AppIcon from '@/components/AppIcon.vue'
 
 const settings = useSettings()
 const points = usePoints()
 const speech = useSpeech()
-const announcer = useAnnouncer()
 const deleteArmed = ref(false)
 const deleting = ref(false)
-
-function testVoice() {
-  speech.speakOnly(nl.settings.testText)
-  if (!settings.appSpeech) announcer.announce(nl.settings.testText)
-}
 
 async function deleteData() {
   if (!deleteArmed.value) {
@@ -41,7 +34,7 @@ function restartOnboarding() {
   speech.say(nl.intro.full)
 }
 
-/** Sliders and the voice list are not tapped twice; just say the new value. */
+/** Sliders are not tapped twice; just say the new value. */
 function sayValue(text: string) {
   if (settings.appSpeech) speech.say(text)
 }
@@ -57,19 +50,7 @@ const choice =
     <section class="card" aria-labelledby="s-speech">
       <h2 id="s-speech" class="mb-4 text-xl font-bold">{{ nl.settings.speechSection }}</h2>
 
-      <fieldset class="min-w-0 space-y-2">
-        <legend class="mb-2 font-bold">{{ nl.settings.speechMode }}</legend>
-        <label :class="choice">
-          <input v-model="settings.appSpeech" type="radio" name="speech" :value="true" class="size-6 accent-accent" />
-          {{ nl.settings.speechApp }}
-        </label>
-        <label :class="choice">
-          <input v-model="settings.appSpeech" type="radio" name="speech" :value="false" class="size-6 accent-accent" />
-          {{ nl.settings.speechReader }}
-        </label>
-      </fieldset>
-
-      <div class="mt-6">
+      <div>
         <label class="flex justify-between font-bold" for="rate">
           <span>{{ nl.settings.rate }}</span>
           <span class="tabular-nums">{{ settings.rate.toFixed(1) }}×</span>
@@ -104,24 +85,6 @@ const choice =
           @change="sayValue(`${nl.settings.volume} ${Math.round(settings.volume * 100)} procent`)"
         />
       </div>
-
-      <div class="mt-4">
-        <label class="font-bold" for="voice">{{ nl.settings.voice }}</label>
-        <select
-          id="voice"
-          v-model="settings.voiceURI"
-          class="mt-2 min-h-14 w-full min-w-0 max-w-full truncate rounded-2xl border-2 border-line bg-bg px-3 text-lg text-fg"
-          @change="sayValue(nl.settings.testText)"
-        >
-          <option value="">{{ nl.settings.voiceDefault }}</option>
-          <option v-for="v in speech.voices.value" :key="v.voiceURI" :value="v.voiceURI">{{ v.name }} ({{ v.lang }})</option>
-        </select>
-      </div>
-
-      <button type="button" data-direct class="btn btn-primary mt-5 w-full" @click="testVoice">
-        <AppIcon name="speaker" />
-        {{ nl.settings.test }}
-      </button>
     </section>
 
     <section class="card" aria-labelledby="s-feedback">

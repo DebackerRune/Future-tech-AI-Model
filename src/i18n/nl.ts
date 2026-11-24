@@ -26,8 +26,7 @@ export const nl = {
     title: 'GeldScan',
     tap: 'Tik ergens op het scherm om te starten',
     hint: 'De app praat dan en legt uit hoe ze werkt.',
-    screenReader: 'Ik gebruik TalkBack of VoiceOver',
-    screenReaderOn: 'Oké. De app laat het voorlezen nu over aan je schermlezer.',
+    screenReaderOn: 'Schermlezer herkend. De app laat het voorlezen nu over aan je schermlezer.',
   },
 
   /** Spoken explanation of the app and the screen layout. */
@@ -40,6 +39,12 @@ export const nl = {
       'Helemaal onderaan het scherm staan drie knoppen naast elkaar: links Scannen, in het midden Instellingen, rechts Hulp. ' +
       'Alle andere knoppen tik je één keer aan om te horen wat ze doen, en nog een keer om ze te gebruiken. ' +
       'Wil je dit opnieuw horen? Open dan Hulp, onderaan rechts.',
+    /** Sent to TalkBack/VoiceOver when a screen reader was detected on the start screen. */
+    screenReader:
+      'Welkom bij GeldScan. Schermlezer herkend, de app laat het voorlezen aan je schermlezer over. ' +
+      'De focus staat op de grote knop Welk biljet is dit. Dubbeltik om een biljet te laten herkennen. ' +
+      'Houd het biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant. ' +
+      'Onderaan staan Scannen, Instellingen en Hulp.',
     short:
       'GeldScan is klaar. Tik in het midden van het scherm om een biljet te herkennen. Onderaan rechts staat Hulp, als je de uitleg opnieuw wil horen.',
   },
@@ -50,7 +55,7 @@ export const nl = {
       'Biljet herkennen. Tik in het midden van het scherm om een biljet te herkennen. ' +
       'Onder de grote knop staan Herhaal, Luisteren, Tellen en Automatisch. Onderaan staan Scannen, Instellingen en Hulp.',
     settings:
-      'Instellingen. Van boven naar onder: wie de antwoorden voorleest, spreeksnelheid, volume, stem, geluidjes, trillen, kleuren, de uitleg, en je gegevens wissen. ' +
+      'Instellingen. Van boven naar onder: spreeksnelheid, volume, geluidjes, trillen, kleuren, de uitleg opnieuw beluisteren, en je gegevens wissen. ' +
       'Tik een knop één keer aan om te horen wat hij doet.',
     help: 'Hulp en privacy. Bovenaan staat de knop Lees deze pagina voor. Tik erop om de hele uitleg te horen.',
     notFound: 'Deze pagina bestaat niet. Tik onderaan links op Scannen om terug te gaan.',
@@ -153,15 +158,8 @@ export const nl = {
 
   settings: {
     speechSection: 'Spraak',
-    speechMode: 'Wie leest de antwoorden voor?',
-    speechApp: 'De app praat zelf',
-    speechReader: 'Alleen mijn schermlezer',
     rate: 'Spreeksnelheid',
     volume: 'Volume',
-    voice: 'Stem',
-    voiceDefault: 'Standaard Nederlandse stem',
-    test: 'Test de stem',
-    testText: 'Dit is een biljet van twintig euro.',
     feedbackSection: 'Geluid en trillen',
     sounds: 'Korte geluidjes',
     vibration: 'Trillen',

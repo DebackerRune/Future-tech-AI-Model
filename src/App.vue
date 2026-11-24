@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import { nl } from '@/i18n/nl'
-import { useSettings } from '@/stores/settings'
 import { usePoints } from '@/stores/points'
 import { useVoiceGuide } from '@/composables/useVoiceGuide'
 import LiveRegion from '@/components/LiveRegion.vue'
 import BottomNav from '@/components/BottomNav.vue'
 import StartScreen from '@/components/StartScreen.vue'
 
-const settings = useSettings()
 const points = usePoints()
 
-// Start screen on every launch for people who let the app speak (speech needs one tap first),
-// and once for everyone so screen-reader users can choose their mode.
-const showStart = ref(settings.appSpeech || !settings.onboardingDone)
+// Start screen on every launch: speech needs one tap first, and how that tap is made
+// (finger or screen-reader double-tap) decides who talks this session.
+const showStart = ref(true)
 
 useVoiceGuide()
 
