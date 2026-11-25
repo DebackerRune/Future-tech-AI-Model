@@ -13,7 +13,7 @@ Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
   antwoord als bij de knop. Hetzelfde biljet wordt pas opnieuw gezegd (en geteld) als het ±1 s uit beeld is
   geweest; een ander biljet meteen. Na een onzeker antwoord probeert de app het één keer opnieuw.
   *"Ik zie geen biljet"* komt alleen na **10 seconden** zonder biljet, en één keer per stille periode.
-  Uit te zetten met de knop *Automatisch* of *"automatisch uit"*.
+  Er is geen knop: het staat altijd aan. *"Automatisch uit"* pauzeert het tot je de app opnieuw opent.
 - **"Welk biljet is dit?"** (knop of spraak, ook naast automatisch): de app kijkt ±1,2 seconde (10 beelden). Elk beeld stemt op een klasse; het biljet
   met de meeste stemmen wint en zijn zekerheid is het gemiddelde over die beelden. Daarna:
   - ≥ 80 % zeker (en minstens de helft van de beelden eens) → *"Dit is een biljet van twintig euro."*

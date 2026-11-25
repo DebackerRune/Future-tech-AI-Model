@@ -34,3 +34,34 @@ suite('voice guide: what is said on the first tap', () => {
     )
   })
 })
+
+suite('voice guide: tap twice to use', () => {
+  it('the first tap only describes, the second tap really clicks the button', async () => {
+    const { mount } = await import('@vue/test-utils')
+    const { createPinia, setActivePinia } = await import('pinia')
+    const { defineComponent, h, ref } = await import('vue')
+    const { useVoiceGuide } = await import('@/composables/useVoiceGuide')
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const clicks = ref(0)
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          useVoiceGuide()
+          return () => h('button', { onClick: () => clicks.value++ }, 'Tellen')
+        },
+      }),
+      { attachTo: document.body, global: { plugins: [pinia] } },
+    )
+    const tap = () => {
+      const button = wrapper.element as HTMLElement
+      button.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }))
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }))
+    }
+    tap()
+    expect(clicks.value).toBe(0)
+    tap()
+    expect(clicks.value).toBe(1)
+    wrapper.unmount()
+  })
+})

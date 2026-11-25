@@ -89,7 +89,8 @@ export function useVoiceGuide() {
     if (pending && pending.el === host && Date.now() - pending.at < CONFIRM_MS) {
       pending = null
       allowUntil = performance.now() + 100
-      haptics.tick() // second tap: buzz and let it through
+      haptics.tick()
+      return // second tap: buzz and let it through
     }
     e.preventDefault()
     e.stopImmediatePropagation()

@@ -54,7 +54,7 @@ export const nl = {
   pageIntro: {
     scan:
       'Biljet herkennen. Houd een biljet voor de camera, de app herkent het vanzelf. Of tik in het midden van het scherm om meteen te scannen. ' +
-      'Onder de grote knop staan Automatisch, Herhaal, Luisteren en Tellen. Onderaan staan Scannen, Instellingen en Hulp.',
+      'Onder de grote knop staan Herhaal, Luisteren en Tellen. Onderaan staan Scannen, Instellingen en Hulp.',
     settings:
       'Instellingen. Van boven naar onder: spreeksnelheid, volume, geluidjes, trillen, kleuren, de uitleg opnieuw beluisteren, en je gegevens wissen. ' +
       'Tik een knop één keer aan om te horen wat hij doet.',
@@ -189,7 +189,7 @@ export const nl = {
     how: [
       'Open de app en tik op het startscherm. Sta de camera toe als je telefoon dat vraagt.',
       'Houd een biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant. Zorg voor licht; zet zo nodig de lamp aan.',
-      'Automatisch staat standaard aan: zodra de app een biljet ziet hoor je een kort geluidje. Houd het biljet dan twee seconden stil. Daarna zegt de app het bedrag.',
+      'Automatisch herkennen staat altijd aan: zodra de app een biljet ziet hoor je een kort geluidje. Houd het biljet dan twee seconden stil. Daarna zegt de app het bedrag.',
       'Wil je niet wachten, tik dan op de grote knop: welk biljet is dit. Dan scant de app meteen.',
       'Je telefoon trilt ook: één keer voor vijf euro, twee keer voor tien, drie keer voor twintig, vier keer voor vijftig.',
       'Biljetten tellen: zet Tellen aan en houd je biljetten één voor één voor de camera. Na elk biljet hoor je het nieuwe totaal. Leg elk biljet even weg voor je het volgende toont, ook als het hetzelfde bedrag is.',

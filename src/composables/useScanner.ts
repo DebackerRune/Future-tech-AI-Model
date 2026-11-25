@@ -8,7 +8,7 @@ import { euroWords } from '@/lib/numberWords'
 import { AutoScanner } from '@/lib/autoScan'
 import { usePoints } from '@/stores/points'
 import { useCounter } from '@/stores/counter'
-import { useSettings } from '@/stores/settings'
+import { useSession } from '@/stores/session'
 import { useCamera, type CameraError } from './useCamera'
 import { useEarcons } from './useEarcons'
 import { useHaptics } from './useHaptics'
@@ -36,7 +36,7 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const haptics = useHaptics()
   const wakeLock = useWakeLock()
   const points = usePoints()
-  const settings = useSettings()
+  const session = useSession()
 
   const busy = ref(false)
   const resultText = ref<string>(nl.scan.cameraOff)
@@ -228,9 +228,9 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     if (announce) say(nl.toggles.autoOff)
   }
 
-  /** The "Automatisch" toggle and voice command; the choice is remembered on the device. */
+  /** Voice command "automatisch aan/uit"; off lasts for this visit only. */
   async function setAuto(on: boolean) {
-    settings.autoScan = on
+    session.autoScan = on
     if (on) await startAuto(true)
     else stopAuto(true)
   }
@@ -292,7 +292,7 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       shutdown()
     } else if (resumeOnVisible) {
       resumeOnVisible = false
-      if (settings.autoScan) void startAuto()
+      if (session.autoScan) void startAuto()
       else
         void ensureReady().then((ok) => {
           if (ok) say(nl.scan.cameraReady, 'normal')
