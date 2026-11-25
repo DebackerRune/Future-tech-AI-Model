@@ -18,7 +18,7 @@ slechtziende mensen.
 - Trillen per biljet: €5 = 1×, €10 = 2×, €20 = 3×, €50 = 4×
 - Korte geluidjes, zaklamp, scherm blijft aan tijdens het scannen
 - Instellingen: spreeksnelheid, volume, geluid, trillen, kleuren
-- Punten in de backend (Firebase) voor elke herkenning ≥ 90 %, niet zichtbaar in de app
+- Elke herkenning ≥ 90 % wordt (anoniem) opgeslagen in de backend (Firebase), niet zichtbaar in de app
 
 ## Techniek
 

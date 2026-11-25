@@ -88,16 +88,16 @@ describe('decideAnswer', () => {
     perClass: [],
     frames: 10,
   })
-  it('says the amount from 80%, and only rewards from 90%', () => {
+  it('says the amount from 80%, and only stores from 90%', () => {
     expect(decideAnswer(agg('20 euro', 0.85))).toEqual({
       kind: 'note',
       value: 20,
       confidence: 0.85,
       certain: false,
-      rewarded: false,
+      stored: false,
     })
-    expect(decideAnswer(agg('20 euro', 0.92))).toMatchObject({ kind: 'note', rewarded: true, certain: false })
-    expect(decideAnswer(agg('20 euro', 0.98))).toMatchObject({ kind: 'note', rewarded: true, certain: true })
+    expect(decideAnswer(agg('20 euro', 0.92))).toMatchObject({ kind: 'note', stored: true, certain: false })
+    expect(decideAnswer(agg('20 euro', 0.98))).toMatchObject({ kind: 'note', stored: true, certain: true })
   })
   it('is unsure between 50% and 80%, or when too few frames agree', () => {
     expect(decideAnswer(agg('10 euro', 0.6))).toMatchObject({ kind: 'unsure', value: 10 })

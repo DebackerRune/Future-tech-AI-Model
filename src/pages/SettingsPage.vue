@@ -3,13 +3,13 @@ import { ref } from 'vue'
 import { nl } from '@/i18n/nl'
 import { ANSWER_THRESHOLD } from '@/lib/decide'
 import { useSettings } from '@/stores/settings'
-import { usePoints } from '@/stores/points'
+import { useScanLog } from '@/stores/scans'
 import { useSpeech } from '@/composables/useSpeech'
 import { patternFor, vibrate, vibrationSupported } from '@/composables/useHaptics'
 import AppIcon from '@/components/AppIcon.vue'
 
 const settings = useSettings()
-const points = usePoints()
+const scanLog = useScanLog()
 const speech = useSpeech()
 const deleteArmed = ref(false)
 const deleting = ref(false)
@@ -23,7 +23,7 @@ async function deleteData() {
   }
   deleting.value = true
   try {
-    await points.deleteAll()
+    await scanLog.deleteAll()
     speech.say(nl.settings.deleteDone)
   } finally {
     deleting.value = false
@@ -156,7 +156,7 @@ const choice =
       <h2 id="s-data" class="mb-2 text-xl font-bold">{{ nl.settings.dataSection }}</h2>
       <p class="flex items-center gap-2 text-base text-muted">
         <AppIcon name="shield" :size="18" />
-        {{ points.cloud ? nl.settings.storedCloud : nl.settings.storedLocal }}
+        {{ scanLog.cloud ? nl.settings.storedCloud : nl.settings.storedLocal }}
       </p>
       <button type="button" data-direct class="btn btn-danger mt-4 w-full" :disabled="deleting" @click="deleteData">
         <AppIcon name="trash" />

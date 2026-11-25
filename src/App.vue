@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import { nl } from '@/i18n/nl'
-import { usePoints } from '@/stores/points'
+import { useScanLog } from '@/stores/scans'
 import { useSession } from '@/stores/session'
 import { useVoiceGuide } from '@/composables/useVoiceGuide'
 import LiveRegion from '@/components/LiveRegion.vue'
 import BottomNav from '@/components/BottomNav.vue'
 import StartScreen from '@/components/StartScreen.vue'
 
-const points = usePoints()
+const scanLog = useScanLog()
 const session = useSession()
 
 // Start screen on every launch: speech needs one tap first, and how that tap is made
@@ -18,7 +18,7 @@ const showStart = ref(true)
 useVoiceGuide()
 
 onMounted(() => {
-  void points.init()
+  void scanLog.init()
 })
 
 async function started() {

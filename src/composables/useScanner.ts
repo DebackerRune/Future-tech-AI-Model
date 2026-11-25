@@ -3,10 +3,9 @@ import { storeToRefs } from 'pinia'
 import { nl } from '@/i18n/nl'
 import { aggregatePredictions, type Aggregate, type ClassPrediction } from '@/lib/aggregate'
 import { decideAnswer, THRESHOLD, type Answer } from '@/lib/decide'
-import { noteValues } from '@/lib/labels'
 import { euroWords } from '@/lib/numberWords'
 import { AutoScanner } from '@/lib/autoScan'
-import { usePoints } from '@/stores/points'
+import { useScanLog } from '@/stores/scans'
 import { useCounter } from '@/stores/counter'
 import { useCamera, type CameraError } from './useCamera'
 import { useEarcons } from './useEarcons'
@@ -34,7 +33,7 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const earcons = useEarcons()
   const haptics = useHaptics()
   const wakeLock = useWakeLock()
-  const points = usePoints()
+  const scanLog = useScanLog()
 
   const busy = ref(false)
   const resultText = ref<string>(nl.scan.cameraOff)
@@ -103,9 +102,9 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       text += ` ${nl.answer.total(counter.add(value))}`
     }
     say(text)
-    // Stored silently in the backend (assignment requirement: points only above 90 %).
+    // Stored silently in the backend, only above the 90 % threshold.
     if (confidence >= THRESHOLD) {
-      void points.record(label, value, confidence, counting.value ? 'counting' : 'ask', noteValues(model.labels.value))
+      void scanLog.record({ label, valueEuro: value, confidence, mode: counting.value ? 'counting' : 'ask' })
     }
   }
 

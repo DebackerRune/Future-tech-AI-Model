@@ -1,6 +1,6 @@
 import type { Aggregate } from './aggregate'
 
-/** Points (and the stored scan) only from this confidence — the assignment's > 90 % rule. */
+/** A scan is stored in the backend only from this confidence — the assignment's > 90 % rule. */
 export const THRESHOLD = 0.9
 /** The amount is said from this confidence ("vrij zeker"). */
 export const ANSWER_THRESHOLD = 0.8
@@ -12,8 +12,8 @@ export const UNSURE_MIN = 0.5
 export const MIN_AGREEMENT = 0.5
 
 export type Answer =
-  /** amount is said; `rewarded` when it also counts for points (≥ 90 %) */
-  | { kind: 'note'; value: number; confidence: number; certain: boolean; rewarded: boolean }
+  /** amount is said; `stored` when it is also saved in the backend (≥ 90 %) */
+  | { kind: 'note'; value: number; confidence: number; certain: boolean; stored: boolean }
   /** a note is on top, but not sure which one */
   | { kind: 'unsure'; value: number; confidence: number }
   /** a note is on top, but the model can't read it */
@@ -35,7 +35,7 @@ export function decideAnswer(agg: Aggregate): Answer {
       value: agg.value,
       confidence: agg.confidence,
       certain: agg.confidence >= CERTAIN,
-      rewarded: agg.confidence >= THRESHOLD,
+      stored: agg.confidence >= THRESHOLD,
     }
   }
   if (agg.confidence >= UNSURE_MIN) return { kind: 'unsure', value: agg.value, confidence: agg.confidence }

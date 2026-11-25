@@ -9,6 +9,6 @@ export const firebaseConfig = {
   storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
 }
 
-/** Firebase is optional: without env vars the app keeps points on the device. Kept separate so the
+/** Firebase is optional: without env vars the app keeps scans on the device. Kept separate so the
  * (large) Firebase SDK is only downloaded when it is actually configured. */
 export const firebaseEnabled = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId)
