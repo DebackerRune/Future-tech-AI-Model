@@ -5,8 +5,6 @@ export type Intent =
   | 'resetTotal'
   | 'countingOn'
   | 'countingOff'
-  | 'continuousOn'
-  | 'continuousOff'
   | 'torchOn'
   | 'torchOff'
   | 'help'
@@ -33,11 +31,10 @@ const RULES: [Intent, RegExp][] = [
   ['resetTotal', /\b(wis|wissen|reset|herstart|leeg|nul)\b.*\b(totaal|teller)?\b|^reset$/],
   ['countingOn', new RegExp(`\\b(tellen|teller|optellen)\\b.*\\b${ON}\\b|\\b(begin|start)\\b.*\\btellen\\b`)],
   ['countingOff', new RegExp(`\\b(tellen|teller|optellen)\\b.*\\b${OFF}\\b`)],
-  ['continuousOn', new RegExp(`\\b(automatisch|automaat|doorlopend)\\b.*\\b${ON}\\b`)],
-  ['continuousOff', new RegExp(`\\b(automatisch|automaat|doorlopend)\\b.*\\b${OFF}\\b`)],
   ['torchOn', new RegExp(`\\b(lamp|licht|zaklamp|flits)\\b.*\\b${ON}\\b`)],
   ['torchOff', new RegExp(`\\b(lamp|licht|zaklamp|flits)\\b.*\\b${OFF}\\b`)],
-  ['total', /\b(totaal|hoeveel heb ik|hoeveel geld|samen)\b/],
+  // "wat is het totaal bedrag", "totaalbedrag" (often written as one word), "hoeveel is het samen", …
+  ['total', /\b(totaal\w*|totale|hoeveel heb ik|hoeveel geld|samen|opgeteld)\b/],
   ['help', /\b(help|hulp|wat kan ik zeggen|commandos?|opdrachten)\b/],
   ['repeat', /\b(herhaal|herhalen|nog eens|nog een keer|opnieuw zeggen|wat zei je|pardon)\b/],
   ['ask', new RegExp(`\\b(welk|welke|wat|wat voor|hoeveel)\\b.*\\b${NOTE}\\b`)],

@@ -53,7 +53,7 @@ export const nl = {
   pageIntro: {
     scan:
       'Biljet herkennen. Tik in het midden van het scherm om een biljet te herkennen. ' +
-      'Onder de grote knop staan Herhaal, Luisteren, Tellen en Automatisch. Onderaan staan Scannen, Instellingen en Hulp.',
+      'Onder de grote knop staan Herhaal, Luisteren en Tellen. Onderaan staan Scannen, Instellingen en Hulp.',
     settings:
       'Instellingen. Van boven naar onder: spreeksnelheid, volume, geluidjes, trillen, kleuren, de uitleg opnieuw beluisteren, en je gegevens wissen. ' +
       'Tik een knop één keer aan om te horen wat hij doet.',
@@ -84,7 +84,6 @@ export const nl = {
     repeat: 'Herhaal',
     listening: 'Luisteren',
     counting: 'Tellen',
-    continuous: 'Automatisch',
     torch: 'Lamp',
     resetTotal: 'Totaal wissen',
     totalLabel: 'Totaal geteld',
@@ -99,7 +98,6 @@ export const nl = {
   answer: {
     note: (value: number, certain: boolean) =>
       `Dit is een biljet van ${euroWords(value)}. ${certain ? 'Ik ben er zeker van.' : 'Ik ben er vrij zeker van.'}`,
-    noteShort: (value: number) => `${euroWords(value)}.`,
     unsure: (value: number) =>
       `Ik denk ${euroWords(value)}, maar ik ben niet zeker. Houd het biljet plat, ongeveer twintig centimeter voor de camera, en vraag het opnieuw.`,
     unclear:
@@ -107,19 +105,14 @@ export const nl = {
     none: 'Ik zie geen biljet. Houd het biljet voor de camera en vraag het opnieuw.',
     dark: 'Het is erg donker. Zet de lamp aan of zoek meer licht.',
     total: (total: number) => `Totaal ${euroWords(total)}.`,
-    totalNow: (total: number) => `Je hebt samen ${euroWords(total)} geteld.`,
+    totalNow: (total: number) => `Het totaal bedrag is ${euroWords(total)}.`,
+    totalNothing: 'Je hebt nog niets geteld. Zet Tellen aan en laat je biljetten één voor één herkennen.',
   },
 
-  hints: {
-    noNote: 'Geen biljet gevonden. Houd het biljet plat, ongeveer twintig centimeter voor de camera.',
-    unsure: 'Niet zeker. Draai het biljet of houd het iets verder weg.',
-  },
 
   toggles: {
     countingOn: (total: number) => `Tellen aan. Totaal ${euroWords(total)}.`,
     countingOff: 'Tellen uit.',
-    continuousOn: 'Automatisch aan. Houd een biljet voor de camera.',
-    continuousOff: 'Automatisch uit.',
     listeningOn:
       'Ik luister. Vraagt je telefoon toegang tot de microfoon, tik dan op Toestaan. Zeg daarna bijvoorbeeld: welk biljet is dit.',
     listeningOff: 'Ik luister niet meer.',
@@ -142,15 +135,14 @@ export const nl = {
   },
 
   voiceHelp:
-    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Automatisch aan of uit. Lamp aan of uit. Help. Of stop.',
+    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Lamp aan of uit. Help. Of stop.',
 
   commandList: [
     ['Welk biljet is dit? / Wat is dit?', 'Herkent het biljet voor de camera'],
     ['Herhaal', 'Zegt het laatste antwoord opnieuw'],
-    ['Totaal', 'Zegt hoeveel je samen geteld hebt'],
+    ['Wat is het totaal bedrag? / Totaal', 'Zegt hoeveel je samen geteld hebt'],
     ['Wis totaal', 'Zet het totaal terug op nul'],
     ['Tellen aan / uit', 'Telt elk herkend biljet op'],
-    ['Automatisch aan / uit', 'Zegt een biljet vanzelf, zonder te vragen'],
     ['Lamp aan / uit', 'Zet de zaklamp van je telefoon aan of uit'],
     ['Help', 'Zegt welke opdrachten er zijn'],
     ['Stop', 'Stopt met praten'],

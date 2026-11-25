@@ -32,10 +32,6 @@ async function onIntent(intent: Intent) {
       return scanner.setCounting(true)
     case 'countingOff':
       return scanner.setCounting(false)
-    case 'continuousOn':
-      return scanner.setContinuous(true)
-    case 'continuousOff':
-      return scanner.setContinuous(false)
     case 'torchOn':
       return scanner.setTorch(true)
     case 'torchOff':
@@ -43,7 +39,6 @@ async function onIntent(intent: Intent) {
     case 'help':
       return scanner.say(nl.voiceHelp)
     case 'stop':
-      if (scanner.continuous.value) await scanner.setContinuous(false)
       scanner.stopAll()
       return
   }
@@ -121,7 +116,6 @@ onMounted(async () => {
         @toggle="toggleListening"
       />
       <ToggleButton icon="plus" :label="nl.scan.counting" :pressed="scanner.counting.value" @toggle="scanner.setCounting" />
-      <ToggleButton icon="auto" :label="nl.scan.continuous" :pressed="scanner.continuous.value" @toggle="scanner.setContinuous" />
       <ToggleButton
         v-if="scanner.camera.torchAvailable.value"
         icon="torch"

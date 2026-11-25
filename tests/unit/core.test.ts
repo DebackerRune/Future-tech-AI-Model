@@ -3,7 +3,6 @@ import { isNoteLabel, noteValues, valueFromLabel } from '@/lib/labels'
 import { dutchNumber, euroWords } from '@/lib/numberWords'
 import { aggregatePredictions } from '@/lib/aggregate'
 import { decideAnswer } from '@/lib/decide'
-import { StabilityTracker } from '@/lib/stability'
 
 const LABELS = ['5 euro', '10 euro', '20 euro', '50 euro', 'geen biljet']
 const frame = (probs: number[]) => LABELS.map((className, i) => ({ className, probability: probs[i] }))
@@ -110,36 +109,5 @@ describe('decideAnswer', () => {
   it('only says "geen biljet" when that class wins', () => {
     expect(decideAnswer(agg('geen biljet', 0.99)).kind).toBe('none')
     expect(decideAnswer(agg('geen biljet', 0.4)).kind).toBe('none')
-  })
-})
-
-describe('StabilityTracker', () => {
-  it('announces after 5 stable frames, not before', () => {
-    const t = new StabilityTracker()
-    for (let i = 0; i < 4; i++) expect(t.push('20 euro', 0.95, i * 100)).toBeNull()
-    expect(t.push('20 euro', 0.95, 500)).toMatchObject({ value: 20 })
-  })
-  it('does not repeat the same note until it was taken away', () => {
-    const t = new StabilityTracker({ minGapMs: 0 })
-    for (let i = 0; i < 5; i++) t.push('20 euro', 0.95, i)
-    for (let i = 0; i < 10; i++) expect(t.push('20 euro', 0.95, 10 + i)).toBeNull()
-    for (let i = 0; i < 5; i++) t.push('geen biljet', 0.99, 30 + i)
-    let out = null
-    for (let i = 0; i < 5; i++) out = t.push('20 euro', 0.95, 40 + i)
-    expect(out).toMatchObject({ value: 20 })
-  })
-  it('ignores frames below the threshold', () => {
-    const t = new StabilityTracker()
-    for (let i = 0; i < 10; i++) expect(t.push('50 euro', 0.8, i * 100)).toBeNull()
-  })
-  it('respects the minimum gap between different notes', () => {
-    const t = new StabilityTracker({ minGapMs: 1500 })
-    for (let i = 0; i < 5; i++) t.push('20 euro', 0.95, i * 100)
-    let out = null
-    for (let i = 0; i < 5; i++) out = t.push('50 euro', 0.95, 500 + i * 100)
-    expect(out).toBeNull()
-    // once the gap has passed it is announced on the next stable frame (and only once)
-    const later = Array.from({ length: 5 }, (_, i) => t.push('50 euro', 0.95, 2000 + i * 100)).filter(Boolean)
-    expect(later).toEqual([expect.objectContaining({ value: 50 })])
   })
 })

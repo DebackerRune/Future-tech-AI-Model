@@ -1,12 +1,12 @@
 import { onBeforeUnmount, ref, shallowRef, type Ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { nl } from '@/i18n/nl'
 import { aggregatePredictions, type ClassPrediction } from '@/lib/aggregate'
-import { ANSWER_THRESHOLD, decideAnswer, THRESHOLD } from '@/lib/decide'
+import { decideAnswer, THRESHOLD } from '@/lib/decide'
 import { noteValues } from '@/lib/labels'
-import { StabilityTracker } from '@/lib/stability'
 import { euroWords } from '@/lib/numberWords'
 import { usePoints } from '@/stores/points'
-import type { ScanMode } from '@/firebase/scans'
+import { useCounter } from '@/stores/counter'
 import { useCamera, type CameraError } from './useCamera'
 import { useEarcons } from './useEarcons'
 import { useHaptics } from './useHaptics'
@@ -18,14 +18,11 @@ const ASK_FRAMES = 10
 /** Extra frames when the first look was unsure, before giving up. */
 const RETRY_FRAMES = 8
 const ASK_INTERVAL_MS = 120
-const CONTINUOUS_INTERVAL_MS = 150
 const DARK_LUMINANCE = 45
-const HINT_AFTER_MS = 8000
-const HINT_QUIET_MS = 16000
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-/** Everything that happens on the scan page: asking, continuous mode, counting, torch. */
+/** Everything that happens on the scan page: asking, counting, torch. */
 export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const camera = useCamera()
   const model = useModel()
@@ -38,16 +35,11 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const busy = ref(false)
   const resultText = ref<string>(nl.scan.cameraOff)
   const perClass = shallowRef<ClassPrediction[]>([])
-  const counting = ref(false)
-  const continuous = ref(false)
-  const total = ref(0)
+  // Counting state lives in a store so the total survives page changes and reloads.
+  const counter = useCounter()
+  const { counting, total } = storeToRefs(counter)
   const resetArmed = ref(false)
 
-  // Continuous mode speaks from 80 %, like asking; points still need 90 %.
-  const tracker = new StabilityTracker({ threshold: ANSWER_THRESHOLD })
-  let loopTimer: ReturnType<typeof setTimeout> | undefined
-  let lastActivity = 0
-  let lastHint = 0
   let resumeOnVisible = false
 
   function say(text: string, priority: 'high' | 'normal' = 'high') {
@@ -91,18 +83,18 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     return true
   }
 
-  async function onConfidentNote(label: string, value: number, confidence: number, mode: ScanMode, fullSentence: boolean, certain: boolean) {
+  function onConfidentNote(label: string, value: number, confidence: number, certain: boolean) {
     haptics.note(value)
     earcons.play('found')
-    let text = fullSentence ? nl.answer.note(value, certain) : nl.answer.noteShort(value)
+    let text = nl.answer.note(value, certain)
     if (counting.value) {
-      total.value += value
-      text += ` ${nl.answer.total(total.value)}`
+      // Say the new total right after the note: "… twintig euro. Totaal vijfenveertig euro."
+      text += ` ${nl.answer.total(counter.add(value))}`
     }
     say(text)
     // Stored silently in the backend (assignment requirement: points only above 90 %).
     if (confidence >= THRESHOLD) {
-      void points.record(label, value, confidence, counting.value ? 'counting' : mode, noteValues(model.labels.value))
+      void points.record(label, value, confidence, counting.value ? 'counting' : 'ask', noteValues(model.labels.value))
     }
   }
 
@@ -145,10 +137,9 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       perClass.value = agg.perClass
       const dark = frames.length > 0 && lum / frames.length < DARK_LUMINANCE
       const darkHint = dark ? ` ${nl.answer.dark}` : ''
-      lastActivity = Date.now()
 
       if (answer.kind === 'note') {
-        await onConfidentNote(agg.label, answer.value, answer.confidence, 'ask', true, answer.certain)
+        onConfidentNote(agg.label, answer.value, answer.confidence, answer.certain)
       } else if (answer.kind === 'unsure') {
         earcons.play('unsure')
         say(nl.answer.unsure(answer.value) + darkHint)
@@ -161,45 +152,6 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       }
     } finally {
       busy.value = false
-    }
-  }
-
-  async function loop() {
-    if (!continuous.value || !video.value) return
-    if (!busy.value) {
-      const f = await model.predictVideo(video.value)
-      if (f && f.predictions.length) {
-        perClass.value = [...f.predictions].sort((a, b) => b.probability - a.probability)
-        const top = perClass.value[0]
-        const now = Date.now()
-        const stable = tracker.push(top.className, top.probability, now)
-        if (stable) {
-          lastActivity = now
-          await onConfidentNote(stable.label, stable.value, stable.confidence, 'continuous', false, false)
-        } else if (now - lastActivity > HINT_AFTER_MS && now - lastHint > HINT_QUIET_MS) {
-          lastHint = now
-          const unsure = top.probability > 0.5 && top.probability < ANSWER_THRESHOLD && /\d/.test(top.className)
-          say(unsure ? nl.hints.unsure : nl.hints.noNote, 'normal')
-        }
-      }
-    }
-    if (continuous.value) loopTimer = setTimeout(loop, CONTINUOUS_INTERVAL_MS)
-  }
-
-  async function setContinuous(on: boolean) {
-    if (on === continuous.value) return
-    if (on) {
-      if (!(await ensureReady())) return
-      continuous.value = true
-      tracker.reset()
-      lastActivity = Date.now()
-      lastHint = 0
-      say(nl.toggles.continuousOn)
-      void loop()
-    } else {
-      continuous.value = false
-      clearTimeout(loopTimer)
-      say(nl.toggles.continuousOff)
     }
   }
 
@@ -218,12 +170,13 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       return
     }
     resetArmed.value = false
-    total.value = 0
+    counter.reset()
     say(nl.toggles.resetDone)
   }
 
+  /** "Wat is het totaal bedrag?" */
   function sayTotal() {
-    say(nl.answer.totalNow(total.value))
+    say(total.value === 0 && !counting.value ? nl.answer.totalNothing : nl.answer.totalNow(total.value))
   }
 
   async function setTorch(on: boolean) {
@@ -245,7 +198,6 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   }
 
   function shutdown() {
-    clearTimeout(loopTimer)
     camera.stop(video.value)
     void wakeLock.disable()
   }
@@ -258,17 +210,13 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     } else if (resumeOnVisible) {
       resumeOnVisible = false
       void ensureReady().then((ok) => {
-        if (ok) {
-          say(nl.scan.cameraReady, 'normal')
-          if (continuous.value) void loop()
-        }
+        if (ok) say(nl.scan.cameraReady, 'normal')
       })
     }
   }
   document.addEventListener('visibilitychange', onVisibility)
   onBeforeUnmount(() => {
     document.removeEventListener('visibilitychange', onVisibility)
-    continuous.value = false
     shutdown()
   })
 
@@ -279,12 +227,10 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     resultText,
     perClass,
     counting,
-    continuous,
     total,
     resetArmed,
     ask,
     repeat,
-    setContinuous,
     setCounting,
     resetTotal,
     sayTotal,
