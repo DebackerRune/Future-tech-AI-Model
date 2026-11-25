@@ -79,14 +79,17 @@ export function useVoiceGuide() {
     if (!settings.appSpeech || e.detail === 0) return
     if (performance.now() < allowUntil) return // the follow-up click a <label> sends to its input
     const el = target?.closest(INTERACTIVE) as HTMLElement | null
-    if (!el || el.closest('[data-direct], #ask-button')) return
+    if (!el) return
+    // Buttons that act at once still get a short buzz (the main button buzzes on its own).
+    if (el.closest('[data-direct]')) haptics.tick()
+    if (el.closest('[data-direct], #ask-button')) return
     const input = el.tagName === 'INPUT' ? el : null
     const host = (input?.closest('label') as HTMLElement | null) ?? el
 
     if (pending && pending.el === host && Date.now() - pending.at < CONFIRM_MS) {
       pending = null
       allowUntil = performance.now() + 100
-      return // second tap: let it through
+      haptics.tick() // second tap: buzz and let it through
     }
     e.preventDefault()
     e.stopImmediatePropagation()
