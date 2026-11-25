@@ -38,7 +38,8 @@ export function describe(el: HTMLElement): string {
  *   everything to the screen reader. Any screen-reader click later in the session also switches
  *   the app's own voice off.
  * - Explore by touch (only when the app speaks): the first tap on a control reads what it is,
- *   a second tap on the same control uses it. The main button and `data-direct` elements act at once.
+ *   a second tap on the same control uses it. The main button and `data-direct` elements act at once,
+ *   and so does every mouse click (laptop) and keyboard press.
  */
 export function useVoiceGuide() {
   const settings = useSettings()
@@ -49,8 +50,10 @@ export function useVoiceGuide() {
   let allowUntil = 0
   let lastPointerVirtual = false
   let lastPointerTouch = false
+  let lastPointerMouse = false
 
   function onPointerDown(e: PointerEvent) {
+    lastPointerMouse = e.pointerType === 'mouse' && e.pressure > 0
     lastPointerTouch = isRealTouch(e)
     lastPointerVirtual = !lastPointerTouch && isVirtualPointerEvent(e)
   }
@@ -58,8 +61,10 @@ export function useVoiceGuide() {
   function onClick(e: MouseEvent) {
     const target = e.target as Element | null
     const screenReader = isScreenReaderClick(e, lastPointerVirtual, lastPointerTouch)
+    const mouse = lastPointerMouse
     lastPointerVirtual = false
     lastPointerTouch = false
+    lastPointerMouse = false
 
     // The start screen decides the mode for this session.
     if (target?.closest('[data-start]')) {
@@ -76,7 +81,8 @@ export function useVoiceGuide() {
       return
     }
 
-    if (!settings.appSpeech || e.detail === 0) return
+    // Tap twice is for touchscreens. A mouse click (laptop) or the keyboard acts at once.
+    if (!settings.appSpeech || e.detail === 0 || mouse) return
     if (performance.now() < allowUntil) return // the follow-up click a <label> sends to its input
     const el = target?.closest(INTERACTIVE) as HTMLElement | null
     if (!el) return

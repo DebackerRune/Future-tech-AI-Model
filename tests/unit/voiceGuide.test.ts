@@ -62,6 +62,14 @@ suite('voice guide: tap twice to use', () => {
     expect(clicks.value).toBe(0)
     tap()
     expect(clicks.value).toBe(1)
+
+    // A mouse click (laptop) acts at once.
+    const button = wrapper.element as HTMLElement
+    const pointer = new MouseEvent('pointerdown', { bubbles: true })
+    Object.defineProperties(pointer, { pointerType: { value: 'mouse' }, pressure: { value: 0.5 } })
+    button.dispatchEvent(pointer)
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }))
+    expect(clicks.value).toBe(2)
     wrapper.unmount()
   })
 })
