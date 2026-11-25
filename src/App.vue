@@ -2,12 +2,14 @@
 import { nextTick, onMounted, ref } from 'vue'
 import { nl } from '@/i18n/nl'
 import { usePoints } from '@/stores/points'
+import { useSession } from '@/stores/session'
 import { useVoiceGuide } from '@/composables/useVoiceGuide'
 import LiveRegion from '@/components/LiveRegion.vue'
 import BottomNav from '@/components/BottomNav.vue'
 import StartScreen from '@/components/StartScreen.vue'
 
 const points = usePoints()
+const session = useSession()
 
 // Start screen on every launch: speech needs one tap first, and how that tap is made
 // (finger or screen-reader double-tap) decides who talks this session.
@@ -21,6 +23,7 @@ onMounted(() => {
 
 async function started() {
   showStart.value = false
+  session.started = true // the scan page now starts the camera (and automatic mode)
   await nextTick()
   const target = document.getElementById('ask-button') ?? document.getElementById('page-title')
   target?.focus()

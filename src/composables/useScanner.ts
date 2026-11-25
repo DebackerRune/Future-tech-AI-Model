@@ -1,12 +1,14 @@
 import { onBeforeUnmount, ref, shallowRef, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { nl } from '@/i18n/nl'
-import { aggregatePredictions, type ClassPrediction } from '@/lib/aggregate'
-import { decideAnswer, THRESHOLD } from '@/lib/decide'
+import { aggregatePredictions, type Aggregate, type ClassPrediction } from '@/lib/aggregate'
+import { decideAnswer, THRESHOLD, type Answer } from '@/lib/decide'
 import { noteValues } from '@/lib/labels'
 import { euroWords } from '@/lib/numberWords'
+import { AutoScanner } from '@/lib/autoScan'
 import { usePoints } from '@/stores/points'
 import { useCounter } from '@/stores/counter'
+import { useSettings } from '@/stores/settings'
 import { useCamera, type CameraError } from './useCamera'
 import { useEarcons } from './useEarcons'
 import { useHaptics } from './useHaptics'
@@ -18,11 +20,14 @@ const ASK_FRAMES = 10
 /** Extra frames when the first look was unsure, before giving up. */
 const RETRY_FRAMES = 8
 const ASK_INTERVAL_MS = 120
+/** Automatic mode: how often a frame is checked while watching, and while scanning (2 s). */
+const WATCH_INTERVAL_MS = 250
+const AUTO_SCAN_INTERVAL_MS = 120
 const DARK_LUMINANCE = 45
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-/** Everything that happens on the scan page: asking, counting, torch. */
+/** Everything that happens on the scan page: automatic mode, the button, counting, torch. */
 export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const camera = useCamera()
   const model = useModel()
@@ -31,6 +36,7 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const haptics = useHaptics()
   const wakeLock = useWakeLock()
   const points = usePoints()
+  const settings = useSettings()
 
   const busy = ref(false)
   const resultText = ref<string>(nl.scan.cameraOff)
@@ -39,6 +45,13 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const counter = useCounter()
   const { counting, total } = storeToRefs(counter)
   const resetArmed = ref(false)
+
+  /** Automatic mode is running (camera on, frames being watched). */
+  const autoRunning = ref(false)
+  const auto = new AutoScanner(Date.now())
+  let autoTimer: ReturnType<typeof setTimeout> | undefined
+  let autoLum = 0
+  let autoLumFrames = 0
 
   let resumeOnVisible = false
 
@@ -98,6 +111,24 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     }
   }
 
+  /** Say the answer for a finished scan (button or automatic). Same wording for both. */
+  function speakAnswer(agg: Aggregate, answer: Answer, dark: boolean) {
+    perClass.value = agg.perClass
+    const darkHint = dark ? ` ${nl.answer.dark}` : ''
+    if (answer.kind === 'note') {
+      onConfidentNote(agg.label, answer.value, answer.confidence, answer.certain)
+    } else if (answer.kind === 'unsure') {
+      earcons.play('unsure')
+      say(nl.answer.unsure(answer.value) + darkHint)
+    } else if (answer.kind === 'unclear') {
+      earcons.play('unsure')
+      say(nl.answer.unclear + darkHint)
+    } else {
+      earcons.play('none')
+      say(nl.answer.none + darkHint)
+    }
+  }
+
   /** Grab `count` frames; returns their predictions and the summed brightness. */
   async function sample(v: HTMLVideoElement, count: number, into: ClassPrediction[][]): Promise<number> {
     let lum = 0
@@ -112,10 +143,11 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     return lum
   }
 
-  /** "Welk biljet is dit?" — look ~1.2 s, let the frames vote, and say the most confident answer. */
+  /** Button / "Welk biljet is dit?": scan right away (~1.2 s), also while automatic mode runs. */
   async function ask(): Promise<void> {
     if (busy.value) return
     busy.value = true
+    auto.cancelScan()
     try {
       earcons.play('start')
       haptics.tick()
@@ -134,26 +166,76 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
         answer = decideAnswer(agg)
       }
 
-      perClass.value = agg.perClass
-      const dark = frames.length > 0 && lum / frames.length < DARK_LUMINANCE
-      const darkHint = dark ? ` ${nl.answer.dark}` : ''
-
-      if (answer.kind === 'note') {
-        onConfidentNote(agg.label, answer.value, answer.confidence, answer.certain)
-      } else if (answer.kind === 'unsure') {
-        earcons.play('unsure')
-        say(nl.answer.unsure(answer.value) + darkHint)
-      } else if (answer.kind === 'unclear') {
-        earcons.play('unsure')
-        say(nl.answer.unclear + darkHint)
-      } else {
-        earcons.play('none')
-        say(nl.answer.none + darkHint)
-      }
+      speakAnswer(agg, answer, frames.length > 0 && lum / frames.length < DARK_LUMINANCE)
+      // Share the memory with automatic mode, so this note isn't answered (or counted) twice.
+      auto.markHandled(agg.label, answer.kind, Date.now())
     } finally {
       busy.value = false
     }
   }
+
+  // ---------- Automatic mode ----------
+
+  async function autoTick() {
+    if (!autoRunning.value) return
+    const v = video.value
+    if (!busy.value && v && camera.active.value) {
+      const f = await model.predictVideo(v)
+      if (f && autoRunning.value && !busy.value) {
+        const now = Date.now()
+        const event = auto.push(f.predictions, now)
+        if (auto.phase === 'scanning') {
+          autoLum += f.luminance
+          autoLumFrames++
+        }
+        if (event?.type === 'scanStart') {
+          // Something is in view: short sound + tick so the user holds the note still.
+          earcons.play('start')
+          haptics.tick()
+          resultText.value = nl.scan.asking
+          autoLum = f.luminance
+          autoLumFrames = 1
+        } else if (event?.type === 'scanDone') {
+          const agg = aggregatePredictions(event.frames)
+          const answer = decideAnswer(agg)
+          speakAnswer(agg, answer, autoLumFrames > 0 && autoLum / autoLumFrames < DARK_LUMINANCE)
+          auto.markHandled(agg.label, answer.kind, now)
+        } else if (event?.type === 'noNote') {
+          earcons.play('none')
+          say(nl.answer.none)
+        }
+      }
+    }
+    if (autoRunning.value) {
+      autoTimer = setTimeout(autoTick, auto.phase === 'scanning' ? AUTO_SCAN_INTERVAL_MS : WATCH_INTERVAL_MS)
+    }
+  }
+
+  /** Start watching the camera. `announce` says so (when the user switches it on). */
+  async function startAuto(announce = false): Promise<void> {
+    if (autoRunning.value) return
+    if (!(await ensureReady())) return
+    auto.reset(Date.now())
+    autoRunning.value = true
+    if (announce) say(nl.toggles.autoOn)
+    else resultText.value = nl.scan.autoWatching
+    void autoTick()
+  }
+
+  function stopAuto(announce = false) {
+    autoRunning.value = false
+    clearTimeout(autoTimer)
+    if (announce) say(nl.toggles.autoOff)
+  }
+
+  /** The "Automatisch" toggle and voice command; the choice is remembered on the device. */
+  async function setAuto(on: boolean) {
+    settings.autoScan = on
+    if (on) await startAuto(true)
+    else stopAuto(true)
+  }
+
+  // ---------- Counting, torch, misc ----------
 
   function setCounting(on: boolean) {
     counting.value = on
@@ -198,20 +280,23 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   }
 
   function shutdown() {
+    stopAuto()
     camera.stop(video.value)
     void wakeLock.disable()
   }
 
-  // Stop the camera when the app is hidden; resume politely when it comes back.
+  // Stop the camera when the app is hidden; resume (and automatic mode) when it comes back.
   function onVisibility() {
     if (document.visibilityState === 'hidden') {
-      resumeOnVisible = camera.active.value
+      resumeOnVisible = camera.active.value || autoRunning.value
       shutdown()
     } else if (resumeOnVisible) {
       resumeOnVisible = false
-      void ensureReady().then((ok) => {
-        if (ok) say(nl.scan.cameraReady, 'normal')
-      })
+      if (settings.autoScan) void startAuto()
+      else
+        void ensureReady().then((ok) => {
+          if (ok) say(nl.scan.cameraReady, 'normal')
+        })
     }
   }
   document.addEventListener('visibilitychange', onVisibility)
@@ -229,8 +314,11 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     counting,
     total,
     resetArmed,
+    autoRunning,
     ask,
     repeat,
+    startAuto,
+    setAuto,
     setCounting,
     resetTotal,
     sayTotal,

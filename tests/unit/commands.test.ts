@@ -26,6 +26,8 @@ describe('parseCommand', () => {
     ['reset', 'resetTotal'],
     ['tellen aan', 'countingOn'],
     ['tellen uit', 'countingOff'],
+    ['automatisch aan', 'autoOn'],
+    ['automatisch uit', 'autoOff'],
     ['lamp aan', 'torchOn'],
     ['zet het licht aan', 'torchOn'],
     ['lamp uit', 'torchOff'],

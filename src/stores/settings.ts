@@ -14,6 +14,8 @@ export interface Settings {
   vibration: boolean
   theme: Theme
   onboardingDone: boolean
+  /** Automatic mode: recognise a note as soon as it is held up (default on) */
+  autoScan: boolean
 }
 
 const KEY = 'geldscan.settings.v1'
@@ -26,6 +28,7 @@ export const DEFAULT_SETTINGS: Settings = {
   vibration: true,
   theme: 'dark',
   onboardingDone: false,
+  autoScan: true,
 }
 
 export const useSettings = defineStore('settings', () => {

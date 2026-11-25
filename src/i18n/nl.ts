@@ -33,8 +33,9 @@ export const nl = {
   intro: {
     full:
       'Welkom bij GeldScan. Deze app herkent eurobiljetten en zegt het bedrag. ' +
-      'Zo werkt het scherm: bijna het hele scherm is één grote knop. Tik daar één keer op om een biljet te laten herkennen. ' +
-      'Houd het biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant van je telefoon. ' +
+      'Houd een biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant van je telefoon. ' +
+      'De app herkent het vanzelf: je hoort een kort geluidje, houd het biljet dan twee seconden stil, en de app zegt het bedrag. ' +
+      'Wil je niet wachten? Bijna het hele scherm is één grote knop. Tik daarop om meteen te scannen. ' +
       'De eerste keer vraagt je telefoon toegang tot de camera. Tik dan op Toestaan. ' +
       'Helemaal onderaan het scherm staan drie knoppen naast elkaar: links Scannen, in het midden Instellingen, rechts Hulp. ' +
       'Alle andere knoppen tik je één keer aan om te horen wat ze doen, en nog een keer om ze te gebruiken. ' +
@@ -42,18 +43,18 @@ export const nl = {
     /** Sent to TalkBack/VoiceOver when a screen reader was detected on the start screen. */
     screenReader:
       'Welkom bij GeldScan. Schermlezer herkend, de app laat het voorlezen aan je schermlezer over. ' +
-      'De focus staat op de grote knop Welk biljet is dit. Dubbeltik om een biljet te laten herkennen. ' +
-      'Houd het biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant. ' +
+      'Houd een biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant. De app herkent het vanzelf en zegt het bedrag. ' +
+      'De focus staat op de grote knop Welk biljet is dit. Dubbeltik om meteen te scannen. ' +
       'Onderaan staan Scannen, Instellingen en Hulp.',
     short:
-      'GeldScan is klaar. Tik in het midden van het scherm om een biljet te herkennen. Onderaan rechts staat Hulp, als je de uitleg opnieuw wil horen.',
+      'GeldScan is klaar. Houd een biljet voor de camera, de app herkent het vanzelf. Of tik in het midden van het scherm om meteen te scannen. Onderaan rechts staat Hulp, als je de uitleg opnieuw wil horen.',
   },
 
   /** Spoken when a page opens, so the user knows what is on it and where. */
   pageIntro: {
     scan:
-      'Biljet herkennen. Tik in het midden van het scherm om een biljet te herkennen. ' +
-      'Onder de grote knop staan Herhaal, Luisteren en Tellen. Onderaan staan Scannen, Instellingen en Hulp.',
+      'Biljet herkennen. Houd een biljet voor de camera, de app herkent het vanzelf. Of tik in het midden van het scherm om meteen te scannen. ' +
+      'Onder de grote knop staan Automatisch, Herhaal, Luisteren en Tellen. Onderaan staan Scannen, Instellingen en Hulp.',
     settings:
       'Instellingen. Van boven naar onder: spreeksnelheid, volume, geluidjes, trillen, kleuren, de uitleg opnieuw beluisteren, en je gegevens wissen. ' +
       'Tik een knop één keer aan om te horen wat hij doet.',
@@ -84,6 +85,8 @@ export const nl = {
     repeat: 'Herhaal',
     listening: 'Luisteren',
     counting: 'Tellen',
+    auto: 'Automatisch',
+    autoWatching: 'Houd een biljet voor de camera.',
     torch: 'Lamp',
     resetTotal: 'Totaal wissen',
     totalLabel: 'Totaal geteld',
@@ -99,10 +102,10 @@ export const nl = {
     note: (value: number, certain: boolean) =>
       `Dit is een biljet van ${euroWords(value)}. ${certain ? 'Ik ben er zeker van.' : 'Ik ben er vrij zeker van.'}`,
     unsure: (value: number) =>
-      `Ik denk ${euroWords(value)}, maar ik ben niet zeker. Houd het biljet plat, ongeveer twintig centimeter voor de camera, en vraag het opnieuw.`,
+      `Ik denk ${euroWords(value)}, maar ik ben niet zeker. Houd het biljet stil en plat, ongeveer twintig centimeter voor de camera.`,
     unclear:
-      'Ik zie een biljet, maar ik kan het niet goed lezen. Houd het stil, plat en iets dichter bij de camera, en vraag het opnieuw.',
-    none: 'Ik zie geen biljet. Houd het biljet voor de camera en vraag het opnieuw.',
+      'Ik zie een biljet, maar ik kan het niet goed lezen. Houd het stil, plat en iets dichter bij de camera.',
+    none: 'Ik zie geen biljet. Houd een biljet plat voor de camera.',
     dark: 'Het is erg donker. Zet de lamp aan of zoek meer licht.',
     total: (total: number) => `Totaal ${euroWords(total)}.`,
     totalNow: (total: number) => `Het totaal bedrag is ${euroWords(total)}.`,
@@ -113,6 +116,8 @@ export const nl = {
   toggles: {
     countingOn: (total: number) => `Tellen aan. Totaal ${euroWords(total)}.`,
     countingOff: 'Tellen uit.',
+    autoOn: 'Automatisch aan. Houd een biljet voor de camera, de app herkent het vanzelf.',
+    autoOff: 'Automatisch uit. Tik op de grote knop om een biljet te laten herkennen.',
     listeningOn:
       'Ik luister. Vraagt je telefoon toegang tot de microfoon, tik dan op Toestaan. Zeg daarna bijvoorbeeld: welk biljet is dit.',
     listeningOff: 'Ik luister niet meer.',
@@ -135,7 +140,7 @@ export const nl = {
   },
 
   voiceHelp:
-    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Lamp aan of uit. Help. Of stop.',
+    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Automatisch aan of uit. Lamp aan of uit. Help. Of stop.',
 
   commandList: [
     ['Welk biljet is dit? / Wat is dit?', 'Herkent het biljet voor de camera'],
@@ -143,6 +148,7 @@ export const nl = {
     ['Wat is het totaal bedrag? / Totaal', 'Zegt hoeveel je samen geteld hebt'],
     ['Wis totaal', 'Zet het totaal terug op nul'],
     ['Tellen aan / uit', 'Telt elk herkend biljet op'],
+    ['Automatisch aan / uit', 'Herkent een biljet vanzelf zodra je het voor de camera houdt'],
     ['Lamp aan / uit', 'Zet de zaklamp van je telefoon aan of uit'],
     ['Help', 'Zegt welke opdrachten er zijn'],
     ['Stop', 'Stopt met praten'],
@@ -176,10 +182,13 @@ export const nl = {
   help: {
     howTitle: 'Zo gebruik je GeldScan',
     how: [
-      'Open de app en druk op de grote knop: welk biljet is dit.',
-      'Sta de camera toe als je browser dat vraagt.',
-      'Houd het biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant. Zorg voor licht; zet zo nodig de lamp aan.',
-      'De app kijkt ongeveer één seconde en zegt dan het bedrag. Je telefoon trilt ook: één keer voor vijf euro, twee keer voor tien, drie keer voor twintig, vier keer voor vijftig.',
+      'Open de app en tik op het startscherm. Sta de camera toe als je telefoon dat vraagt.',
+      'Houd een biljet plat, ongeveer twintig centimeter voor de camera aan de achterkant. Zorg voor licht; zet zo nodig de lamp aan.',
+      'Automatisch staat standaard aan: zodra de app een biljet ziet hoor je een kort geluidje. Houd het biljet dan twee seconden stil. Daarna zegt de app het bedrag.',
+      'Wil je niet wachten, tik dan op de grote knop: welk biljet is dit. Dan scant de app meteen.',
+      'Je telefoon trilt ook: één keer voor vijf euro, twee keer voor tien, drie keer voor twintig, vier keer voor vijftig.',
+      'Biljetten tellen: zet Tellen aan en houd je biljetten één voor één voor de camera. Na elk biljet hoor je het nieuwe totaal. Leg elk biljet even weg voor je het volgende toont, ook als het hetzelfde bedrag is.',
+      'Zie je niets gebeuren? Na tien seconden zonder biljet zegt de app: ik zie geen biljet.',
     ],
     voiceTitle: 'Spraakopdrachten',
     voiceIntro: 'Zet Luisteren aan, of houd de grote knop lang ingedrukt, en zeg een van deze zinnen:',

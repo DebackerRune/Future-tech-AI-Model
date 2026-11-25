@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { nl } from '@/i18n/nl'
+import { useSettings } from '@/stores/settings'
+import { useSession } from '@/stores/session'
 import type { Intent } from '@/lib/commands'
 import { euroWords } from '@/lib/numberWords'
 import { useScanner } from '@/composables/useScanner'
@@ -15,6 +17,8 @@ const big = ref<InstanceType<typeof BigAskButton> | null>(null)
 const videoEl = computed(() => big.value?.video ?? null)
 const scanner = useScanner(videoEl)
 const earcons = useEarcons()
+const settings = useSettings()
+const session = useSession()
 
 const recognition = useRecognition(onIntent)
 
@@ -32,6 +36,10 @@ async function onIntent(intent: Intent) {
       return scanner.setCounting(true)
     case 'countingOff':
       return scanner.setCounting(false)
+    case 'autoOn':
+      return scanner.setAuto(true)
+    case 'autoOff':
+      return scanner.setAuto(false)
     case 'torchOn':
       return scanner.setTorch(true)
     case 'torchOff':
@@ -66,9 +74,19 @@ function pushToTalk() {
 
 const showTotal = computed(() => scanner.counting.value || scanner.total.value > 0)
 
+// Automatic mode (on by default) starts once the start screen was tapped — and again when the
+// user comes back to this page.
+watch(
+  () => session.started,
+  (started) => {
+    if (started && settings.autoScan) void scanner.startAuto()
+  },
+)
+
 onMounted(async () => {
   await nextTick()
   big.value?.button?.focus()
+  if (session.started && settings.autoScan) void scanner.startAuto()
 })
 </script>
 
@@ -104,6 +122,7 @@ onMounted(async () => {
   <section aria-labelledby="controls-title" class="mt-6">
     <h2 id="controls-title" class="eyebrow mb-3">{{ nl.scan.controls }}</h2>
     <div class="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+      <ToggleButton icon="auto" :label="nl.scan.auto" :pressed="settings.autoScan" @toggle="scanner.setAuto" />
       <button type="button" class="btn w-full justify-start" @click="scanner.repeat()">
         <AppIcon name="repeat" />
         {{ nl.scan.repeat }}

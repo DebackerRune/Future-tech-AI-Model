@@ -8,7 +8,13 @@ Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
 
 ## Functies
 
-- **"Welk biljet is dit?"**: de app kijkt ±1,2 seconde (10 beelden). Elk beeld stemt op een klasse; het biljet
+- **Automatisch (standaard aan)**: de camera kijkt ±4× per seconde mee. Ziet de app een biljet (3 van de
+  laatste 5 beelden ≥ 50 %), dan klinkt een kort geluidje en scant ze **2 seconden**; daarna volgt hetzelfde
+  antwoord als bij de knop. Hetzelfde biljet wordt pas opnieuw gezegd (en geteld) als het ±1 s uit beeld is
+  geweest; een ander biljet meteen. Na een onzeker antwoord probeert de app het één keer opnieuw.
+  *"Ik zie geen biljet"* komt alleen na **10 seconden** zonder biljet, en één keer per stille periode.
+  Uit te zetten met de knop *Automatisch* of *"automatisch uit"*.
+- **"Welk biljet is dit?"** (knop of spraak, ook naast automatisch): de app kijkt ±1,2 seconde (10 beelden). Elk beeld stemt op een klasse; het biljet
   met de meeste stemmen wint en zijn zekerheid is het gemiddelde over die beelden. Daarna:
   - ≥ 80 % zeker (en minstens de helft van de beelden eens) → *"Dit is een biljet van twintig euro."*
   - ≥ 90 % → ook opgeslagen in de backend, met punten
@@ -19,8 +25,8 @@ Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
 - **Spraak**: de app leest zichzelf voor (Nederlandse stem, instelbare snelheid en volume). Gebruikt iemand
   TalkBack of VoiceOver, dan herkent de app dat aan de tik op het startscherm en laat ze het voorlezen aan de
   schermlezer over.
-- **Spraakopdrachten** (optioneel): welk biljet is dit, herhaal, totaal, wis totaal, tellen aan/uit,
-  lamp aan/uit, help, stop. Ook *push-to-talk*: de grote knop lang indrukken.
+- **Spraakopdrachten** (optioneel): welk biljet is dit, herhaal, wat is het totaal bedrag, wis totaal,
+  tellen aan/uit, automatisch aan/uit, lamp aan/uit, help, stop. Ook *push-to-talk*: de grote knop lang indrukken.
 - **Trillen per biljet** (ook voor doofblinden): €5 = 1×, €10 = 2×, €20 = 3×, €50 = 4×.
 - **Korte geluidjes** (Web Audio) voor kijken, gevonden, niet zeker, niets gevonden en fout.
 - **Tellen**: telt meerdere biljetten op (*"Twintig euro. Totaal vijfenvijftig euro."*).
