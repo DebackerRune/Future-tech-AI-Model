@@ -162,6 +162,11 @@ export const nl = {
     sounds: 'Korte geluidjes',
     vibration: 'Trillen',
     vibrationHint: 'Vijf euro: één keer. Tien euro: twee keer. Twintig euro: drie keer. Vijftig euro: vier keer.',
+    vibrationTest: 'Test trillen',
+    vibrationUnsupported:
+      'Deze browser kan niet trillen. Op een iPhone kan geen enkele website trillen; gebruik de geluidjes en de stem.',
+    vibrationBlocked:
+      'Het toestel trilde niet. Kijk of trillen aan staat in de instellingen van je telefoon, bij Geluid en trillen, en of de stille modus of energiebesparing uit staat.',
     displaySection: 'Weergave',
     theme: 'Kleuren',
     themeDark: 'Geel op zwart',

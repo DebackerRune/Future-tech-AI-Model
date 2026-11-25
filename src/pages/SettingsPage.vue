@@ -5,6 +5,7 @@ import { ANSWER_THRESHOLD } from '@/lib/decide'
 import { useSettings } from '@/stores/settings'
 import { usePoints } from '@/stores/points'
 import { useSpeech } from '@/composables/useSpeech'
+import { patternFor, vibrate, vibrationSupported } from '@/composables/useHaptics'
 import AppIcon from '@/components/AppIcon.vue'
 
 const settings = useSettings()
@@ -32,6 +33,21 @@ async function deleteData() {
 
 function restartOnboarding() {
   speech.say(nl.intro.full)
+}
+
+const canVibrate = vibrationSupported()
+const vibrationMessage = ref('')
+
+/** Buzz the €20 pattern (three pulses) so the user can feel whether vibration works. */
+function testVibration() {
+  if (!canVibrate) vibrationMessage.value = nl.settings.vibrationUnsupported
+  else if (!vibrate(patternFor(20))) vibrationMessage.value = nl.settings.vibrationBlocked
+  else vibrationMessage.value = ''
+  if (vibrationMessage.value) speech.say(vibrationMessage.value)
+}
+
+function onVibrationChange() {
+  if (settings.vibration) testVibration()
 }
 
 /** Sliders are not tapped twice; just say the new value. */
@@ -95,11 +111,24 @@ const choice =
           {{ nl.settings.sounds }}
         </label>
         <label :class="choice">
-          <input v-model="settings.vibration" type="checkbox" aria-describedby="vib-hint" class="size-6 accent-accent" />
+          <input
+            v-model="settings.vibration"
+            type="checkbox"
+            aria-describedby="vib-hint"
+            class="size-6 accent-accent"
+            @change="onVibrationChange"
+          />
           {{ nl.settings.vibration }}
         </label>
       </div>
       <p id="vib-hint" class="mt-3 text-base text-muted">{{ nl.settings.vibrationHint }}</p>
+      <button v-if="canVibrate" type="button" class="btn mt-3 w-full justify-start" @click="testVibration">
+        <AppIcon name="repeat" />
+        {{ nl.settings.vibrationTest }}
+      </button>
+      <p v-if="!canVibrate || vibrationMessage" class="mt-3 text-base font-bold">
+        {{ vibrationMessage || nl.settings.vibrationUnsupported }}
+      </p>
     </section>
 
     <section class="card" aria-labelledby="s-display">

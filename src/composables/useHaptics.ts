@@ -6,24 +6,42 @@ const ORDER = [5, 10, 20, 50, 100, 200, 500]
 export function patternFor(value: number): number[] {
   const count = Math.max(1, ORDER.indexOf(value) + 1)
   const pattern: number[] = []
-  for (let i = 0; i < count; i++) pattern.push(250, 150)
+  for (let i = 0; i < count; i++) pattern.push(300, 200)
   pattern.pop()
   return pattern
 }
 
+/** iPhone/iPad (Safari and every other iOS browser) has no vibration API at all. */
+export function vibrationSupported(): boolean {
+  return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
+}
+
+/** Vibrate, ignoring the setting. Returns false when the browser refused (no support or no tap yet). */
+export function vibrate(pattern: number | number[]): boolean {
+  if (!vibrationSupported()) return false
+  try {
+    return navigator.vibrate(pattern)
+  } catch {
+    return false
+  }
+}
+
 export function useHaptics() {
   const settings = useSettings()
-  const can = () => settings.vibration && typeof navigator !== 'undefined' && 'vibrate' in navigator
+  const buzz = (pattern: number | number[]) => {
+    if (settings.vibration) vibrate(pattern)
+  }
 
   return {
     note(value: number) {
-      if (can()) navigator.vibrate(patternFor(value))
+      buzz(patternFor(value))
     },
+    // Very short pulses (< ~50 ms) are not felt on many phones.
     tick() {
-      if (can()) navigator.vibrate(30)
+      buzz(80)
     },
     error() {
-      if (can()) navigator.vibrate([80, 60, 80])
+      buzz([150, 100, 150])
     },
   }
 }
