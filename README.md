@@ -1,129 +1,47 @@
 # GeldScan
 
-Een toegankelijke webapp die eurobiljetten herkent met de camera van je smartphone en het bedrag **uitspreekt**.
-Gemaakt voor blinde en slechtziende mensen. Vraag *"Welk biljet is dit?"* of druk op de grote knop, en de app zegt.
+Een webapp die eurobiljetten herkent met de camera van je smartphone en het bedrag uitspreekt, voor blinde en
+slechtziende mensen.
+
+**Live:** https://bill-detector-debackerrune-1343s-projects.vercel.app
 
 ## Functies
 
-- **Automatisch (staat altijd aan)**: de camera kijkt ±4× per seconde mee. Ziet de app een biljet (3 van de
-  laatste 5 beelden ≥ 50 %), dan klinkt een kort geluidje en scant ze **2 seconden**; daarna volgt hetzelfde
-  antwoord als bij de knop. Hetzelfde biljet wordt pas opnieuw gezegd (en geteld) als het ±1 s uit beeld is
-  geweest; een ander biljet meteen. Na een onzeker antwoord probeert de app het één keer opnieuw.
-  *"Ik zie geen biljet"* komt alleen na **10 seconden** zonder biljet, en één keer per stille periode.
-  Er is geen knop of spraakopdracht om het uit te zetten.
-- **"Welk biljet is dit?"** (knop of spraak, ook naast automatisch): de app kijkt ±1,2 seconde (10 beelden). Elk beeld stemt op een klasse; het biljet
-  met de meeste stemmen wint en zijn zekerheid is het gemiddelde over die beelden. Daarna:
-  - ≥ 80 % zeker (en minstens de helft van de beelden eens) → *"Dit is een biljet van twintig euro."*
-  - ≥ 90 % → ook opgeslagen in de backend, met punten
-  - 50–80 % → *"Ik denk twintig euro, maar ik ben niet zeker…"*
-  - een biljet maar < 50 % → *"Ik zie een biljet, maar ik kan het niet goed lezen…"*
-  - alleen als *geen biljet* wint → *"Ik zie geen biljet…"*; met een tip als het te donker is
-  - bij twijfel kijkt de app eerst nog 8 beelden extra
-- **Spraak**: de app leest zichzelf voor (Nederlandse stem, instelbare snelheid en volume). Gebruikt iemand
-  TalkBack of VoiceOver, dan herkent de app dat aan de tik op het startscherm en laat ze het voorlezen aan de
-  schermlezer over.
-- **Spraakopdrachten** (optioneel): welk biljet is dit, herhaal, wat is het totaal bedrag, wis totaal,
-  tellen aan/uit, lamp aan/uit, help, stop. Ook *push-to-talk*: de grote knop lang indrukken.
-- **Trillen per biljet** (ook voor doofblinden): €5 = 1×, €10 = 2×, €20 = 3×, €50 = 4×.
-- **Korte geluidjes** (Web Audio) voor kijken, gevonden, niet zeker, niets gevonden en fout.
-- **Tellen**: telt meerdere biljetten op (*"Twintig euro. Totaal vijfenvijftig euro."*).
-- **Zaklamp**, scherm blijft aan tijdens het scannen, camera stopt als de app op de achtergrond gaat.
-- **Beloningssysteem in de backend**: elke herkenning ≥ 90 % levert punten en badges op die (anoniem) in Firebase
-  worden opgeslagen, of lokaal als Firebase niet ingesteld is. Ze worden bewust **niet getoond of uitgesproken**:
-  voor de gebruiker draait alles om een snel en rustig antwoord.
-- **Installeerbaar (PWA)**; het model wordt gecachet.
+- Automatisch herkennen: houd een biljet voor de camera, na 2 seconden zegt de app het bedrag
+- Grote knop *"Welk biljet is dit?"* om meteen te scannen
+- Antwoord met zekerheid: zeker, niet zeker, onleesbaar of *"Ik zie geen biljet"* (na 10 seconden)
+- De app leest zichzelf voor; met TalkBack of VoiceOver laat ze het voorlezen aan de schermlezer
+- Tik één keer om te horen wat een knop is, twee keer om hem te gebruiken (met de muis: één klik)
+- Spraakopdrachten: welk biljet is dit, herhaal, wat is het totaal bedrag, wis totaal, tellen aan/uit,
+  lamp aan/uit, help, stop
+- Tellen: telt biljetten op en zegt na elk biljet het totaal
+- Trillen per biljet: €5 = 1×, €10 = 2×, €20 = 3×, €50 = 4×
+- Korte geluidjes, zaklamp, scherm blijft aan tijdens het scannen
+- Instellingen: spreeksnelheid, volume, geluid, trillen, kleuren
+- Punten in de backend (Firebase) voor elke herkenning ≥ 90 %, niet zichtbaar in de app
 
 ## Privacy
 
-- Camerabeelden worden alleen in het geheugen verwerkt (een canvas van 224×224) en **nooit** opgeslagen of verstuurd.
-- In Firestore komen enkel: bedrag, zekerheid, punten, modus en tijdstip, onder een anonieme gebruikers-id.
-- Spraakbediening staat standaard uit. Zet je ze aan, dan verwerkt de browser je stem; in Chrome gebeurt dat via
-  de spraakdienst van Google. Dit staat ook in de app (Hulp en de uitleg bij de start).
-- "Wis al mijn gegevens" in Instellingen verwijdert alle scans, je punten en je anonieme account.
-- De dataset bevat enkel biljetten en oppervlakken, geen personen.
+- Camerabeelden blijven op het toestel en worden nooit opgeslagen of verstuurd.
+- In Firebase komen enkel bedrag, zekerheid, punten en tijdstip, onder een anonieme id.
+- "Wis al mijn gegevens" in Instellingen verwijdert alles.
 
 ## Techniek
 
 | Laag | Keuze |
 |---|---|
-| Frontend | Vue 3 + TypeScript + Vite, Vue Router, Pinia, Tailwind CSS 4 |
-| AI | TensorFlow.js + `@teachablemachine/image` (Teachable Machine-model) |
-| Backend | Firebase: anonieme Authentication + Cloud Firestore (Spark, gratis) |
+| Frontend | Vue 3 + TypeScript + Vite, Pinia, Tailwind CSS 4 |
+| AI | Teachable Machine-model met TensorFlow.js (`@teachablemachine/image`) |
+| Backend | Firebase: anonieme Authentication + Cloud Firestore |
 | Hosting | Vercel |
-| PWA | `vite-plugin-pwa` |
-| Tests | Vitest, axe-core, `@firebase/rules-unit-testing` |
 
 ## Lokaal starten
 
 ```bash
 npm install
-cp .env.example .env.local
+cp .env.example .env.local   # Firebase-config invullen
 npm run dev
 ```
-
-Open `http://localhost:5173`. De camera van de gsm werkt alleen via `https` of `localhost`. Testen op je telefoon kan het
-
-| Script | Wat |
-|---|---|
-| `npm run dev` | ontwikkelserver |
-| `npm run build` | type-check + productiebuild in `dist/` |
-| `npm test` | unit- en toegankelijkheidstests |
-| `npm run test:rules` | Firestore-regels testen met de emulator (Firebase CLI + Java nodig) |
-| `npm run lint` | ESLint, met regels voor toegankelijkheid |
-
-## Firebase instellen
-
-Project: `bill-detector-37420`
-
-1. **Authentication → Sign-in method → Anonymous** aanzetten.
-2. **Firestore Database → Create database** (productiemodus, regio bv. `europe-west1`).
-3. **Project settings → General → Your apps → Web app** toevoegen en de config overnemen in `.env.local`
-   (en later in Vercel).
-4. Regels uitrollen:
-   ```bash
-   npm install -g firebase-tools
-   firebase login
-   firebase deploy --only firestore:rules
-   ```
-5. Na de Vercel-deploy: **Authentication → Settings → Authorized domains** → je Vercel-domein toevoegen.
-
-### Datamodel
-
-```
-users/{uid}                 points, scanCount, seen[], badges[], streakDays, lastScanAt, lastScanValue, lastScanId, createdAt
-users/{uid}/scans/{scanId}  label, valueEuro, confidence, points, mode, createdAt
-```
-
-Een scan en de nieuwe totalen worden in **één batch** geschreven. De regels (`firestore.rules`) controleren dat:
-- elke gebruiker alleen zijn eigen data ziet;
-- alleen geldige biljetten en een zekerheid ≥ 0,9 toegelaten zijn;
-- punten alleen kunnen stijgen samen met een nieuwe scan;
-- scans achteraf niet aangepast kunnen worden.
-
-### Punten (alleen in de backend, niet zichtbaar in de app)
-
-| Gebeurtenis | Punten |
-|---|---|
-| Biljet herkend (≥ 90 %) | +10 |
-| Eerste scan | badge *Eerste biljet* |
-| Alle biljetten minstens één keer herkend | +50 en badge *Alle biljetten herkend* |
-| 3 dagen op rij | +25 en badge *Drie dagen op rij* |
-| Hetzelfde biljet binnen 10 s | telt niet |
-
-## Deploy op Vercel
-
-1. Push naar GitHub en importeer de repo op vercel.com (framework: Vite; staat al in `vercel.json`).
-2. **Settings → Environment Variables**: zet alle `VITE_FIREBASE_*`-waarden uit `.env.example`.
-3. Deploy, en voeg het domein toe in Firebase (stap 5 hierboven).
-
-`vercel.json` stuurt alle routes naar `index.html` (nodig voor Vue Router) en zet cache-headers voor het model.
-
-## Model vervangen
-
-Exporteer in Teachable Machine via **Model exporteren → Tensorflow.js → Download** en zet `model.json`,
-`metadata.json` en `weights.bin` in `public/model/`. De klassen worden uit `metadata.json` gelezen: een klasse met
-een getal (`20 euro`) is een biljet, een klasse zonder getal (`geen biljet`) betekent geen biljet. Extra klassen
-(bv. `100 euro`) werken zonder codewijziging.
 
 ## Dataset
 
@@ -211,9 +129,3 @@ model.
 **Hoe ik AI gebruikte.** Als programmeur die mijn plan uitvoert: ik bepaalde wat de app moet doen en voor wie,
 de AI schreef de code, en ik controleerde het resultaat in de praktijk. De dataset en het model zijn volledig
 mijn eigen werk.
-
-## Beperkingen
-
-- Herkent **geen vals geld**; gebruik de app niet als enige controle bij betalingen.
-- Spraakbediening werkt niet in elke browser (bv. Firefox); de grote knop werkt altijd.
-- Het model is getraind op 5, 10, 20 en 50 euro.
