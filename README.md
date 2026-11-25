@@ -1,9 +1,10 @@
 # GeldScan
 
+- **Webapp (best op gsm met geluid):** https://bill-detector-debackerrune-1343s-projects.vercel.app
+- **Repo:** https://github.com/DebackerRune/Future-tech-AI-Model
+
 Een webapp die eurobiljetten herkent met de camera van je smartphone en het bedrag uitspreekt, voor blinde en
 slechtziende mensen.
-
-**Live:** https://bill-detector-debackerrune-1343s-projects.vercel.app
 
 ## Functies
 

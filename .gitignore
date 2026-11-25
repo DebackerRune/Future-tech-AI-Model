@@ -19,3 +19,6 @@ upload/
 
 # Local training output
 tools/train-tm/out/
+
+# Firebase config lives in Vercel → Settings → Environment Variables
+.env.production
