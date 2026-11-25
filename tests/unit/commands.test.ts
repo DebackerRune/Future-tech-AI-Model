@@ -33,11 +33,40 @@ describe('parseCommand', () => {
     ['wat kan ik zeggen', 'help'],
     ['stop', 'stop'],
     ['stil', 'stop'],
+    // natural phrasings
+    ['stop met tellen', 'countingOff'],
+    ['stop tellen', 'countingOff'],
+    ['niet meer tellen', 'countingOff'],
+    ['tellen stoppen', 'countingOff'],
+    ['begin met tellen', 'countingOn'],
+    ['tel mee', 'countingOn'],
+    ['stop met praten', 'stop'],
+    ['hou je mond', 'stop'],
+    ['scan dit', 'ask'],
+    ['kijk eens', 'ask'],
+    ['herken dit', 'ask'],
+    ['lees voor', 'ask'],
+    ['lampje aan', 'torchOn'],
+    ['zet de zaklamp even aan', 'torchOn'],
+    ['doe het licht uit alsjeblieft', 'torchOff'],
+    ['totaal wissen', 'resetTotal'],
+    ['zet de teller op nul', 'resetTotal'],
+    ['begin opnieuw', 'resetTotal'],
   ])('"%s" → %s', (text, intent) => {
     expect(parseCommand(text)).toBe(intent)
   })
 
-  it.each(['', 'goedemorgen', 'het weer is mooi vandaag'])('"%s" is not a command', (text) => {
+  it.each([
+    '',
+    'goedemorgen',
+    'het weer is mooi vandaag',
+    // too loose before: these must not clear the total or switch the lamp
+    'wis',
+    'nul euro',
+    'het is nul',
+    'het licht in de kamer is aan',
+    'stop automatisch',
+  ])('"%s" is not a command', (text) => {
     expect(parseCommand(text)).toBeNull()
   })
 })
