@@ -1,19 +1,16 @@
 # GeldScan
 
 Een toegankelijke webapp die eurobiljetten herkent met de camera van je smartphone en het bedrag **uitspreekt**.
-Gemaakt voor blinde en slechtziende mensen. Vraag *"Welk biljet is dit?"* of druk op de grote knop, en de app zegt
-het meest waarschijnlijke antwoord.
-
-Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
+Gemaakt voor blinde en slechtziende mensen. Vraag *"Welk biljet is dit?"* of druk op de grote knop, en de app zegt.
 
 ## Functies
 
-- **Automatisch (standaard aan)**: de camera kijkt ±4× per seconde mee. Ziet de app een biljet (3 van de
+- **Automatisch (staat altijd aan)**: de camera kijkt ±4× per seconde mee. Ziet de app een biljet (3 van de
   laatste 5 beelden ≥ 50 %), dan klinkt een kort geluidje en scant ze **2 seconden**; daarna volgt hetzelfde
   antwoord als bij de knop. Hetzelfde biljet wordt pas opnieuw gezegd (en geteld) als het ±1 s uit beeld is
   geweest; een ander biljet meteen. Na een onzeker antwoord probeert de app het één keer opnieuw.
   *"Ik zie geen biljet"* komt alleen na **10 seconden** zonder biljet, en één keer per stille periode.
-  Er is geen knop: het staat altijd aan. *"Automatisch uit"* pauzeert het tot je de app opnieuw opent.
+  Er is geen knop of spraakopdracht om het uit te zetten.
 - **"Welk biljet is dit?"** (knop of spraak, ook naast automatisch): de app kijkt ±1,2 seconde (10 beelden). Elk beeld stemt op een klasse; het biljet
   met de meeste stemmen wint en zijn zekerheid is het gemiddelde over die beelden. Daarna:
   - ≥ 80 % zeker (en minstens de helft van de beelden eens) → *"Dit is een biljet van twintig euro."*
@@ -26,7 +23,7 @@ Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
   TalkBack of VoiceOver, dan herkent de app dat aan de tik op het startscherm en laat ze het voorlezen aan de
   schermlezer over.
 - **Spraakopdrachten** (optioneel): welk biljet is dit, herhaal, wat is het totaal bedrag, wis totaal,
-  tellen aan/uit, automatisch aan/uit, lamp aan/uit, help, stop. Ook *push-to-talk*: de grote knop lang indrukken.
+  tellen aan/uit, lamp aan/uit, help, stop. Ook *push-to-talk*: de grote knop lang indrukken.
 - **Trillen per biljet** (ook voor doofblinden): €5 = 1×, €10 = 2×, €20 = 3×, €50 = 4×.
 - **Korte geluidjes** (Web Audio) voor kijken, gevonden, niet zeker, niets gevonden en fout.
 - **Tellen**: telt meerdere biljetten op (*"Twintig euro. Totaal vijfenvijftig euro."*).
@@ -35,18 +32,6 @@ Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
   worden opgeslagen, of lokaal als Firebase niet ingesteld is. Ze worden bewust **niet getoond of uitgesproken**:
   voor de gebruiker draait alles om een snel en rustig antwoord.
 - **Installeerbaar (PWA)**; het model wordt gecachet.
-
-## Toegankelijkheid
-
-- WCAG 2.2 AA als minimum: contrast ≥ 7:1 (geel op bijna-zwart, of zwart op wit), tekst vanaf 18 px en
-  schaalbaar, knoppen ≥ 56 px, geen tijdslimieten, geen veegbewegingen nodig.
-- Lettertype **Atkinson Hyperlegible**, ontworpen voor slechtziende lezers.
-- Werkt met TalkBack, VoiceOver en een toetsenbord: skip-link, landmarks, één `h1` per pagina, focus gaat bij een
-  paginawissel naar de titel en de nieuwe pagina wordt aangekondigd, `aria-pressed` op schakelaars,
-  `aria-live` voor elk antwoord, `role="alert"` voor fouten.
-- Gesproken uitleg bij de eerste start (opnieuw te starten via Instellingen).
-- Respecteert `prefers-reduced-motion`.
-- Automatische controle met **axe** op elke pagina (`npm test`).
 
 ## Privacy
 
@@ -72,12 +57,11 @@ Schoolproject *Campus Quest* (MCT3 – Future Tech), track D: eigen idee.
 
 ```bash
 npm install
-cp .env.example .env.local   # vul de Firebase-waarden in (of laat leeg: dan lokale punten)
+cp .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:5173`. De camera werkt alleen via `https` of `localhost`. Testen op je telefoon kan het
-makkelijkst via de Vercel-link.
+Open `http://localhost:5173`. De camera van de gsm werkt alleen via `https` of `localhost`. Testen op je telefoon kan het
 
 | Script | Wat |
 |---|---|

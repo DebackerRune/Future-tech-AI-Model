@@ -34,10 +34,6 @@ async function onIntent(intent: Intent) {
       return scanner.setCounting(true)
     case 'countingOff':
       return scanner.setCounting(false)
-    case 'autoOn':
-      return scanner.setAuto(true)
-    case 'autoOff':
-      return scanner.setAuto(false)
     case 'torchOn':
       return scanner.setTorch(true)
     case 'torchOff':
@@ -77,14 +73,14 @@ const showTotal = computed(() => scanner.counting.value || scanner.total.value >
 watch(
   () => session.started,
   (started) => {
-    if (started && session.autoScan) void scanner.startAuto()
+    if (started) void scanner.startAuto()
   },
 )
 
 onMounted(async () => {
   await nextTick()
   big.value?.button?.focus()
-  if (session.started && session.autoScan) void scanner.startAuto()
+  if (session.started) void scanner.startAuto()
 })
 </script>
 

@@ -85,7 +85,6 @@ export const nl = {
     repeat: 'Herhaal',
     listening: 'Luisteren',
     counting: 'Tellen',
-    auto: 'Automatisch',
     autoWatching: 'Houd een biljet voor de camera.',
     torch: 'Lamp',
     resetTotal: 'Totaal wissen',
@@ -116,8 +115,6 @@ export const nl = {
   toggles: {
     countingOn: (total: number) => `Tellen aan. Totaal ${euroWords(total)}.`,
     countingOff: 'Tellen uit.',
-    autoOn: 'Automatisch aan. Houd een biljet voor de camera, de app herkent het vanzelf.',
-    autoOff: 'Automatisch uit. Tik op de grote knop om een biljet te laten herkennen.',
     listeningOn:
       'Ik luister. Vraagt je telefoon toegang tot de microfoon, tik dan op Toestaan. Zeg daarna bijvoorbeeld: welk biljet is dit.',
     listeningOff: 'Ik luister niet meer.',
@@ -140,7 +137,7 @@ export const nl = {
   },
 
   voiceHelp:
-    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Automatisch aan of uit. Lamp aan of uit. Help. Of stop.',
+    'Je kan zeggen: welk biljet is dit. Herhaal. Totaal. Wis totaal. Tellen aan of uit. Lamp aan of uit. Help. Of stop.',
 
   commandList: [
     ['Welk biljet is dit? / Wat is dit?', 'Herkent het biljet voor de camera'],
@@ -148,7 +145,6 @@ export const nl = {
     ['Wat is het totaal bedrag? / Totaal', 'Zegt hoeveel je samen geteld hebt'],
     ['Wis totaal', 'Zet het totaal terug op nul'],
     ['Tellen aan / uit', 'Telt elk herkend biljet op'],
-    ['Automatisch aan / uit', 'Herkent een biljet vanzelf zodra je het voor de camera houdt'],
     ['Lamp aan / uit', 'Zet de zaklamp van je telefoon aan of uit'],
     ['Help', 'Zegt welke opdrachten er zijn'],
     ['Stop', 'Stopt met praten'],

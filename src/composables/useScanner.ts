@@ -8,7 +8,6 @@ import { euroWords } from '@/lib/numberWords'
 import { AutoScanner } from '@/lib/autoScan'
 import { usePoints } from '@/stores/points'
 import { useCounter } from '@/stores/counter'
-import { useSession } from '@/stores/session'
 import { useCamera, type CameraError } from './useCamera'
 import { useEarcons } from './useEarcons'
 import { useHaptics } from './useHaptics'
@@ -36,7 +35,6 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
   const haptics = useHaptics()
   const wakeLock = useWakeLock()
   const points = usePoints()
-  const session = useSession()
 
   const busy = ref(false)
   const resultText = ref<string>(nl.scan.cameraOff)
@@ -211,28 +209,19 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     }
   }
 
-  /** Start watching the camera. `announce` says so (when the user switches it on). */
-  async function startAuto(announce = false): Promise<void> {
+  /** Start watching the camera (automatic mode is always on). */
+  async function startAuto(): Promise<void> {
     if (autoRunning.value) return
     if (!(await ensureReady())) return
     auto.reset(Date.now())
     autoRunning.value = true
-    if (announce) say(nl.toggles.autoOn)
-    else resultText.value = nl.scan.autoWatching
+    resultText.value = nl.scan.autoWatching
     void autoTick()
   }
 
-  function stopAuto(announce = false) {
+  function stopAuto() {
     autoRunning.value = false
     clearTimeout(autoTimer)
-    if (announce) say(nl.toggles.autoOff)
-  }
-
-  /** Voice command "automatisch aan/uit"; off lasts for this visit only. */
-  async function setAuto(on: boolean) {
-    session.autoScan = on
-    if (on) await startAuto(true)
-    else stopAuto(true)
   }
 
   // ---------- Counting, torch, misc ----------
@@ -292,11 +281,7 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
       shutdown()
     } else if (resumeOnVisible) {
       resumeOnVisible = false
-      if (session.autoScan) void startAuto()
-      else
-        void ensureReady().then((ok) => {
-          if (ok) say(nl.scan.cameraReady, 'normal')
-        })
+      void startAuto()
     }
   }
   document.addEventListener('visibilitychange', onVisibility)
@@ -318,7 +303,6 @@ export function useScanner(video: Ref<HTMLVideoElement | null>) {
     ask,
     repeat,
     startAuto,
-    setAuto,
     setCounting,
     resetTotal,
     sayTotal,

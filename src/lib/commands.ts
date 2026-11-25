@@ -5,8 +5,6 @@ export type Intent =
   | 'resetTotal'
   | 'countingOn'
   | 'countingOff'
-  | 'autoOn'
-  | 'autoOff'
   | 'torchOn'
   | 'torchOff'
   | 'help'
@@ -33,8 +31,6 @@ const RULES: [Intent, RegExp][] = [
   ['resetTotal', /\b(wis|wissen|reset|herstart|leeg|nul)\b.*\b(totaal|teller)?\b|^reset$/],
   ['countingOn', new RegExp(`\\b(tellen|teller|optellen)\\b.*\\b${ON}\\b|\\b(begin|start)\\b.*\\btellen\\b`)],
   ['countingOff', new RegExp(`\\b(tellen|teller|optellen)\\b.*\\b${OFF}\\b`)],
-  ['autoOn', new RegExp(`\\b(automatisch|automaat|vanzelf)\\b.*\\b${ON}\\b`)],
-  ['autoOff', new RegExp(`\\b(automatisch|automaat|vanzelf)\\b.*\\b${OFF}\\b`)],
   ['torchOn', new RegExp(`\\b(lamp|licht|zaklamp|flits)\\b.*\\b${ON}\\b`)],
   ['torchOff', new RegExp(`\\b(lamp|licht|zaklamp|flits)\\b.*\\b${OFF}\\b`)],
   // "wat is het totaal bedrag", "totaalbedrag" (often written as one word), "hoeveel is het samen", …

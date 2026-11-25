@@ -7,7 +7,5 @@ import { ref } from 'vue'
  */
 export const useSession = defineStore('session', () => {
   const started = ref(false)
-  /** Automatic mode: always on at the start of a visit; "automatisch uit" pauses it for this visit only. */
-  const autoScan = ref(true)
-  return { started, autoScan }
+  return { started }
 })
